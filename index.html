@@ -1,0 +1,1389 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <title>Enthalpy – Continuous Cold Chain & Critical Assets Monitoring</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Enthalpy est une solution IoT premium pour la surveillance continue de la température, humidité, vibration et CO2 avec connectivité 5G/Wi-Fi/BLE/Satellite et traçabilité blockchain." />
+  
+  <!-- Google Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+
+  <style>
+    :root {
+      --primary: #1b73ff;
+      --primary-light: #e6f1ff;
+      --accent: #00e0ff;
+      --dark: #061325;
+      --text: #1a2333;
+      --muted: #6f7a94;
+      --bg: #f5f7fb;
+      --card-bg: #ffffff;
+      --radius-xl: 24px;
+      --radius-lg: 18px;
+      --shadow-soft: 0 18px 45px rgba(6, 19, 37, 0.14);
+      --shadow-light: 0 10px 30px rgba(11, 46, 89, 0.08);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: "Poppins", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    a {
+      text-decoration: none;
+      color: inherit;
+    }
+
+    img {
+      max-width: 100%;
+      display: block;
+    }
+
+    /* Layout */
+    .page {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+
+    /* Header */
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      backdrop-filter: blur(10px);
+      background: linear-gradient(to bottom, rgba(245, 247, 251, 0.9), rgba(245, 247, 251, 0.75));
+      border-bottom: 1px solid rgba(255, 255, 255, 0.6);
+    }
+
+    .nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 0;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .logo-mark {
+      width: 34px;
+      height: 34px;
+      border-radius: 16px;
+      background: radial-gradient(circle at 10% 0, #ffffff, #d4ebff);
+      box-shadow: 0 8px 20px rgba(11, 83, 194, 0.33);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 18px;
+      color: var(--primary);
+    }
+
+    .logo-text {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+
+    .logo-text span:first-child {
+      font-weight: 600;
+      font-size: 18px;
+      letter-spacing: 0.05em;
+    }
+
+    .logo-text span:last-child {
+      font-size: 11px;
+      text-transform: uppercase;
+      color: var(--muted);
+      letter-spacing: 0.16em;
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 24px;
+      font-size: 14px;
+      color: var(--muted);
+    }
+
+    .nav-links a:hover {
+      color: var(--primary);
+    }
+
+    .nav-cta {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn {
+      border-radius: 999px;
+      padding: 10px 20px;
+      font-size: 14px;
+      font-weight: 500;
+      border: none;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.18s ease-out;
+      white-space: nowrap;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--primary), #00a4ff);
+      color: #ffffff;
+      box-shadow: 0 12px 35px rgba(13, 83, 197, 0.45);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 18px 40px rgba(13, 83, 197, 0.6);
+    }
+
+    .btn-ghost {
+      background: transparent;
+      border: 1px solid rgba(27, 115, 255, 0.16);
+      color: var(--text);
+    }
+
+    .btn-ghost:hover {
+      background: rgba(255, 255, 255, 0.9);
+      box-shadow: 0 8px 22px rgba(11, 46, 89, 0.14);
+    }
+
+    /* Hero */
+    .hero {
+      padding: 50px 0 70px;
+    }
+
+    .hero-inner {
+      display: grid;
+      grid-template-columns: minmax(0, 1.25fr) minmax(0, 1.1fr);
+      gap: 52px;
+      align-items: center;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      border-radius: 999px;
+      padding: 4px 10px 4px 4px;
+      background: rgba(255, 255, 255, 0.9);
+      border: 1px solid rgba(27, 115, 255, 0.16);
+      font-size: 11px;
+      color: var(--muted);
+      margin-bottom: 18px;
+    }
+
+    .pill-badge {
+      border-radius: 999px;
+      padding: 4px 10px;
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      color: #ffffff;
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .pill span strong {
+      color: var(--primary);
+    }
+
+    .hero-title {
+      font-size: 40px;
+      line-height: 1.1;
+      letter-spacing: -0.03em;
+      margin-bottom: 16px;
+      color: var(--dark);
+    }
+
+    .hero-title span.highlight {
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      -webkit-background-clip: text;
+      color: transparent;
+    }
+
+    .hero-subtitle {
+      font-size: 15px;
+      color: var(--muted);
+      max-width: 480px;
+      margin-bottom: 26px;
+    }
+
+    .hero-actions {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+    }
+
+    .hero-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 26px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .hero-meta-item {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .hero-meta-item strong {
+      font-size: 15px;
+      color: var(--dark);
+    }
+
+    /* Hero right card */
+    .hero-card {
+      border-radius: var(--radius-xl);
+      background: radial-gradient(circle at top, #ffffff, #e1efff 55%, #d2e5ff 100%);
+      box-shadow: var(--shadow-soft);
+      padding: 22px 22px 20px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 18px;
+    }
+
+    .hero-chip {
+      font-size: 11px;
+      padding: 4px 12px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.8);
+      border: 1px solid rgba(18, 92, 224, 0.22);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .hero-chip-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: #24e38a;
+      box-shadow: 0 0 0 6px rgba(36, 227, 138, 0.2);
+    }
+
+    .hero-card-title {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--dark);
+    }
+
+    .hero-card-body {
+      display: grid;
+      grid-template-columns: 1.2fr 1fr;
+      gap: 16px;
+    }
+
+    .hero-metrics {
+      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.94);
+      padding: 14px 16px;
+      box-shadow: var(--shadow-light);
+      position: relative;
+    }
+
+    .hero-metrics-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 10px;
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    .hero-metrics-header strong {
+      font-size: 12px;
+      color: var(--dark);
+    }
+
+    .hero-metric-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+      font-size: 11px;
+    }
+
+    .hero-metric-row span {
+      color: var(--muted);
+    }
+
+    .hero-metric-value {
+      font-weight: 600;
+      font-size: 13px;
+    }
+
+    .badge-good {
+      color: #1f9254;
+    }
+
+    .badge-risk {
+      color: #c7504f;
+    }
+
+    .mini-chart {
+      height: 54px;
+      border-radius: 999px;
+      background: linear-gradient(135deg, rgba(27, 115, 255, 0.07), rgba(0, 224, 255, 0.12));
+      position: relative;
+      overflow: hidden;
+      margin-top: 6px;
+    }
+
+    .mini-chart-line {
+      position: absolute;
+      inset: 0;
+      background-image: linear-gradient(120deg, rgba(27, 115, 255, 0.6), rgba(0, 224, 255, 0.9));
+      opacity: 0.95;
+      clip-path: polygon(0% 65%, 14% 40%, 30% 58%, 48% 20%, 65% 34%, 80% 10%, 100% 24%, 100% 100%, 0% 100%);
+    }
+
+    .hero-side {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    .hero-tag-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .tag {
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.9);
+      border: 1px solid rgba(14, 104, 228, 0.18);
+      font-size: 10px;
+      color: var(--muted);
+    }
+
+    .tag strong {
+      color: var(--primary);
+    }
+
+    .hero-badge {
+      border-radius: 14px;
+      background: rgba(6, 19, 37, 0.9);
+      color: #ffffff;
+      padding: 10px 12px;
+      font-size: 11px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .hero-badge span:first-child {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      opacity: 0.7;
+    }
+
+    .hero-badge strong {
+      font-size: 13px;
+    }
+
+    /* Trusted logos */
+    .strip {
+      padding: 6px 0 30px;
+    }
+
+    .strip-inner {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 12px 24px;
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    .strip-label {
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
+      font-weight: 500;
+      font-size: 10px;
+    }
+
+    .strip-logos {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      align-items: center;
+    }
+
+    .strip-pill {
+      border-radius: 999px;
+      padding: 6px 14px;
+      background: rgba(255, 255, 255, 0.9);
+      border: 1px dashed rgba(140, 162, 196, 0.5);
+      font-size: 11px;
+    }
+
+    /* Sections */
+    section {
+      padding: 40px 0;
+    }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      margin-bottom: 24px;
+    }
+
+    .section-title-block h2 {
+      font-size: 24px;
+      letter-spacing: -0.02em;
+      margin-bottom: 4px;
+      color: var(--dark);
+    }
+
+    .section-title-block p {
+      font-size: 13px;
+      color: var(--muted);
+      max-width: 480px;
+    }
+
+    .section-tag {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      color: var(--muted);
+    }
+
+    /* Features grid */
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 20px;
+    }
+
+    .feature-card {
+      background: var(--card-bg);
+      border-radius: var(--radius-lg);
+      padding: 16px 16px 14px;
+      box-shadow: var(--shadow-light);
+      border: 1px solid rgba(196, 210, 234, 0.6);
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .feature-icon {
+      width: 30px;
+      height: 30px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #ffffff;
+      font-size: 16px;
+      margin-bottom: 4px;
+    }
+
+    .feature-card h3 {
+      font-size: 14px;
+      margin-bottom: 2px;
+    }
+
+    .feature-card p {
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .feature-meta {
+      margin-top: 6px;
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 3px 8px;
+      border-radius: 999px;
+      background: var(--primary-light);
+      font-size: 10px;
+      color: var(--primary);
+      font-weight: 500;
+    }
+
+    /* How it works */
+    .steps {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 18px;
+    }
+
+    .step {
+      background: var(--card-bg);
+      border-radius: var(--radius-lg);
+      padding: 14px 14px 12px;
+      border: 1px solid rgba(210, 224, 245, 0.9);
+    }
+
+    .step-number {
+      width: 24px;
+      height: 24px;
+      border-radius: 999px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--primary);
+      background: rgba(27, 115, 255, 0.07);
+      margin-bottom: 6px;
+    }
+
+    .step h3 {
+      font-size: 13px;
+      margin-bottom: 3px;
+    }
+
+    .step p {
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    /* Industries */
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1.1fr 1fr;
+      gap: 22px;
+      align-items: stretch;
+    }
+
+    .industries-list {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .industry-card {
+      background: var(--card-bg);
+      border-radius: 16px;
+      padding: 12px 12px 10px;
+      border: 1px solid rgba(210, 224, 245, 0.9);
+      font-size: 12px;
+    }
+
+    .industry-card h3 {
+      font-size: 13px;
+      margin-bottom: 4px;
+    }
+
+    .industry-card ul {
+      list-style: none;
+      padding-left: 0;
+      margin: 0;
+    }
+
+    .industry-card li {
+      font-size: 11px;
+      color: var(--muted);
+      margin-bottom: 2px;
+    }
+
+    .industry-highlight {
+      border-radius: var(--radius-lg);
+      background: radial-gradient(circle at top left, #ffffff, #dbe9ff);
+      padding: 16px 16px 14px;
+      box-shadow: var(--shadow-soft);
+      font-size: 12px;
+    }
+
+    .industry-highlight h3 {
+      font-size: 14px;
+      margin-bottom: 4px;
+    }
+
+    .check-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 6px;
+    }
+
+    .check-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 999px;
+      border: 1px solid rgba(102, 187, 106, 0.6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .check-dot span {
+      width: 7px;
+      height: 7px;
+      background: #2e7d32;
+      border-radius: 999px;
+    }
+
+    /* Tech stack */
+    .tech-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .pill-card {
+      border-radius: 999px;
+      background: var(--card-bg);
+      border: 1px solid rgba(210, 224, 245, 0.9);
+      padding: 6px 10px;
+      font-size: 11px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      color: var(--muted);
+    }
+
+    .pill-card strong {
+      color: var(--primary);
+      margin-right: 4px;
+    }
+
+    /* CTA */
+    .cta {
+      margin-top: 10px;
+      padding: 26px 24px 24px;
+      border-radius: var(--radius-xl);
+      background: linear-gradient(125deg, var(--dark), #052046, #1b73ff);
+      color: #ffffff;
+      display: grid;
+      grid-template-columns: 1.4fr 1fr;
+      gap: 18px;
+      align-items: center;
+      box-shadow: var(--shadow-soft);
+    }
+
+    .cta h2 {
+      font-size: 22px;
+      margin-bottom: 6px;
+      letter-spacing: -0.02em;
+    }
+
+    .cta p {
+      font-size: 13px;
+      opacity: 0.85;
+      max-width: 400px;
+    }
+
+    .cta-badges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .cta-badge {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      padding: 4px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(158, 196, 255, 0.5);
+      opacity: 0.88;
+    }
+
+    .cta-right {
+      justify-self: end;
+      text-align: right;
+      font-size: 12px;
+    }
+
+    .cta-right .btn-primary {
+      font-size: 13px;
+      padding: 9px 18px;
+    }
+
+    /* Contact */
+    .contact {
+      margin-top: 26px;
+      padding: 20px 18px 18px;
+      border-radius: var(--radius-xl);
+      background: rgba(255, 255, 255, 0.95);
+      box-shadow: var(--shadow-light);
+      border: 1px solid rgba(210, 224, 245, 0.9);
+    }
+
+    .contact h3 {
+      font-size: 16px;
+      margin-bottom: 4px;
+    }
+
+    .contact p {
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 10px;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .form-field {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      font-size: 11px;
+    }
+
+    .form-field label {
+      color: var(--muted);
+    }
+
+    .form-field input,
+    .form-field textarea {
+      border-radius: 999px;
+      border: 1px solid rgba(182, 199, 225, 0.9);
+      padding: 7px 10px;
+      font-size: 12px;
+      outline: none;
+      font-family: inherit;
+      background: #f9fbff;
+    }
+
+    .form-field textarea {
+      border-radius: 14px;
+      resize: vertical;
+      min-height: 60px;
+    }
+
+    .form-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-top: 4px;
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    /* Footer */
+    footer {
+      padding: 18px 0 24px;
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    footer .footer-inner {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    footer a {
+      color: var(--muted);
+    }
+
+    footer a:hover {
+      color: var(--primary);
+    }
+
+    /* Responsive */
+    @media (max-width: 960px) {
+      .hero-inner {
+        grid-template-columns: minmax(0, 1fr);
+      }
+
+      .hero-card {
+        order: -1;
+      }
+
+      .grid-3 {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .steps {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .grid-2 {
+        grid-template-columns: minmax(0, 1fr);
+      }
+
+      .cta {
+        grid-template-columns: minmax(0, 1fr);
+        text-align: left;
+      }
+
+      .cta-right {
+        justify-self: flex-start;
+        text-align: left;
+      }
+
+      .form-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 720px) {
+      .nav-links {
+        display: none;
+      }
+
+      .hero {
+        padding-top: 30px;
+      }
+
+      .hero-title {
+        font-size: 30px;
+      }
+
+      .grid-3, .steps {
+        grid-template-columns: minmax(0, 1fr);
+      }
+
+      .industries-list {
+        grid-template-columns: minmax(0, 1fr);
+      }
+
+      .tech-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .form-grid {
+        grid-template-columns: minmax(0, 1fr);
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="page">
+    <!-- Header -->
+    <header>
+      <div class="container">
+        <nav class="nav">
+          <a href="#top" class="logo">
+            <div class="logo-mark">E</div>
+            <div class="logo-text">
+              <span>Enthalpy</span>
+              <span>Cold & Critical Monitoring</span>
+            </div>
+          </a>
+          <div class="nav-links">
+            <a href="#solutions">Solution</a>
+            <a href="#how">Fonctionnement</a>
+            <a href="#industries">Secteurs</a>
+            <a href="#tech">Technologie</a>
+          </div>
+          <div class="nav-cta">
+            <a href="#contact" class="btn btn-ghost">Télécharger le one-pager</a>
+            <a href="#contact" class="btn btn-primary">Demander une démo</a>
+          </div>
+        </nav>
+      </div>
+    </header>
+
+    <main id="top">
+      <!-- Hero -->
+      <section class="hero">
+        <div class="container">
+          <div class="hero-inner">
+            <div class="hero-left">
+              <div class="pill">
+                <span class="pill-badge">New</span>
+                <span>Monitoring continu certifiable pour <strong>chaîne du froid & actifs critiques</strong></span>
+              </div>
+              <h1 class="hero-title">
+                Surveillez chaque <span class="highlight">degré</span> avant qu’il ne coûte des millions.
+              </h1>
+              <p class="hero-subtitle">
+                Enthalpy combine IoT multi-capteurs (température, humidité, vibration, CO₂) et traçabilité blockchain
+                pour sécuriser vos flux pharmaceutiques, agroalimentaires et logistiques – en temps réel, partout dans le monde.
+              </p>
+
+              <div class="hero-actions">
+                <a href="#contact" class="btn btn-primary">
+                  Planifier une démo de 20 min
+                </a>
+                <a href="#solutions" class="btn btn-ghost">
+                  Explorer la solution
+                </a>
+              </div>
+
+              <div class="hero-meta">
+                <div class="hero-meta-item">
+                  <strong>&lt; 60 secondes</strong>
+                  <span>pour déployer un capteur sur le terrain</span>
+                </div>
+                <div class="hero-meta-item">
+                  <strong>100% traçable</strong>
+                  <span>via registre blockchain auditable</span>
+                </div>
+                <div class="hero-meta-item">
+                  <strong>Multi-connectivité</strong>
+                  <span>5G · Wi-Fi · BLE · Satellite</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="hero-right">
+              <div class="hero-card">
+                <div class="hero-card-header">
+                  <div>
+                    <div class="hero-card-title">Vue temps réel – Plateforme Enthalpy</div>
+                    <div style="font-size:11px; color:var(--muted);">Site : entrepôt pharmaceutique · Lyon (FR)</div>
+                  </div>
+                  <div class="hero-chip">
+                    <div class="hero-chip-dot"></div>
+                    Live stream · 248 capteurs
+                  </div>
+                </div>
+                <div class="hero-card-body">
+                  <div class="hero-metrics">
+                    <div class="hero-metrics-header">
+                      <span>Cold Room · CR-07</span>
+                      <strong>2–8 ℃ Secure</strong>
+                    </div>
+
+                    <div class="hero-metric-row">
+                      <span>Température moyenne</span>
+                      <div class="hero-metric-value badge-good">4.3 ℃</div>
+                    </div>
+                    <div class="hero-metric-row">
+                      <span>CO₂</span>
+                      <div class="hero-metric-value">684 ppm</div>
+                    </div>
+                    <div class="hero-metric-row">
+                      <span>Vibrations · Pallet #21</span>
+                      <div class="hero-metric-value badge-risk">Risque léger</div>
+                    </div>
+
+                    <div class="mini-chart">
+                      <div class="mini-chart-line"></div>
+                    </div>
+                  </div>
+
+                  <div class="hero-side">
+                    <div>
+                      <div style="font-size:11px; font-weight:500; color:var(--dark); margin-bottom:4px;">
+                        Enregistrements scellés par blockchain
+                      </div>
+                      <p>
+                        Chaque événement critique (rupture de température, ouverture de porte, choc, dérive) est horodaté,
+                        signé et inscrit dans un registre distribué pour audit et conformité.
+                      </p>
+                    </div>
+
+                    <div class="hero-tag-list">
+                      <div class="tag"><strong>GMP · GDP</strong> ready</div>
+                      <div class="tag">Alertes en &lt; 3 secondes</div>
+                      <div class="tag">API & dashboards temps réel</div>
+                      <div class="tag">Digital twin de vos assets</div>
+                    </div>
+
+                    <div class="hero-badge">
+                      <span>Predictive insight</span>
+                      <strong>Prévenir la perte de produits plutôt que la constater.</strong>
+                      <span>Score de stabilité mis à jour en continu, par lot, par site et par transporteur.</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div> <!-- hero-right -->
+          </div>
+        </div>
+      </section>
+
+      <!-- Trusted strip -->
+      <section class="strip">
+        <div class="container">
+          <div class="strip-inner">
+            <div class="strip-label">Pensé pour</div>
+            <div class="strip-logos">
+              <div class="strip-pill">Laboratoires & biotechs</div>
+              <div class="strip-pill">Hôpitaux & pharmacies</div>
+              <div class="strip-pill">Agroalimentaire & surgelés</div>
+              <div class="strip-pill">Logistique & 3PL</div>
+              <div class="strip-pill">Data centers & salles IT</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Solution -->
+      <section id="solutions">
+        <div class="container">
+          <div class="section-header">
+            <div class="section-title-block">
+              <div class="section-tag">Solution</div>
+              <h2>Une plateforme unique pour vos capteurs, sites et flux critiques.</h2>
+              <p>
+                Enthalpy associe capteurs IoT durcis, connectivité hybride et couche blockchain pour livrer une chaîne
+                de preuves de bout en bout — depuis la chambre froide jusqu’au client final.
+              </p>
+            </div>
+          </div>
+
+          <div class="grid-3">
+            <div class="feature-card">
+              <div class="feature-icon">🌡</div>
+              <h3>Capteurs IoT multi-physiques</h3>
+              <p>
+                Température, humidité relative, vibration, CO₂… Des sondes étalonnables, conçues pour les environnements
+                pharmaceutiques et agroalimentaires exigeants.
+              </p>
+              <div class="feature-meta">
+                <span class="badge">-40°C à +85°C</span>
+                <span style="margin-left:6px; font-size:11px;">IP65 · Batterie longue durée</span>
+              </div>
+            </div>
+
+            <div class="feature-card">
+              <div class="feature-icon">📡</div>
+              <h3>Connectivité 5G / Wi-Fi / BLE / Satellite</h3>
+              <p>
+                Couverture continue : sites fixes, hubs logistiques, camions frigorifiques, containers maritimes.
+                Le meilleur canal est sélectionné automatiquement.
+              </p>
+              <div class="feature-meta">
+                Réduction des zones « aveugles » et des données manquantes, même en mouvement.
+              </div>
+            </div>
+
+            <div class="feature-card">
+              <div class="feature-icon">⛓</div>
+              <h3>Traçabilité blockchain</h3>
+              <p>
+                Chaque lecture critique et chaque alerte sont scellées dans un registre distribué, pour une traçabilité
+                infalsifiable – idéale pour les audits.
+              </p>
+              <div class="feature-meta">
+                <span class="badge">Audit-ready</span>
+                <span style="margin-left:6px; font-size:11px;">Preuve horodatée partageable avec vos partenaires</span>
+              </div>
+            </div>
+
+            <div class="feature-card">
+              <div class="feature-icon">📊</div>
+              <h3>Dashboards & IA de prédiction</h3>
+              <p>
+                Visualisez l’état de vos sites en un coup d’œil, projetez les dérives probables et priorisez les actions
+                avant qu’un incident ne survienne.
+              </p>
+              <div class="feature-meta">
+                <span class="badge">Anomalies détectées</span> &nbsp; avant dépassement des seuils.
+              </div>
+            </div>
+
+            <div class="feature-card">
+              <div class="feature-icon">🧩</div>
+              <h3>API & intégrations ouvertes</h3>
+              <p>
+                Connectez Enthalpy à votre WMS, TMS, ERP, outils qualité ou GMAO. Nos APIs REST vous permettent de
+                déclencher vos workflows automatiques.
+              </p>
+              <div class="feature-meta">
+                Connecteurs vers systèmes existants et export de rapports PDF/CSV.
+              </div>
+            </div>
+
+            <div class="feature-card">
+              <div class="feature-icon">🛡</div>
+              <h3>Sécurité & conformité</h3>
+              <p>
+                Chiffrement bout en bout, gestion fine des rôles, journal d’audit. Enthalpy est conçu pour répondre aux
+                exigences qualité les plus strictes.
+              </p>
+              <div class="feature-meta">
+                <span class="badge">By design</span> &nbsp; Sécurité, résilience et scalabilité intégrées au cœur.
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- How it works -->
+      <section id="how">
+        <div class="container">
+          <div class="section-header">
+            <div class="section-title-block">
+              <div class="section-tag">Fonctionnement</div>
+              <h2>De la sonde au registre blockchain, en quelques étapes.</h2>
+              <p>
+                Enthalpy est pensé pour des équipes opérationnelles qui n’ont pas le temps pour les projets « usine à gaz ».
+                Déploiement rapide, valeur mesurable dès les premières semaines.
+              </p>
+            </div>
+          </div>
+
+          <div class="steps">
+            <div class="step">
+              <div class="step-number">1</div>
+              <h3>Déploiement plug & play</h3>
+              <p>
+                Installation des capteurs sur sites (chambres froides, entrepôts, camions, containers…) et création de vos
+                assets dans la plateforme (sites, lignes, zones).
+              </p>
+            </div>
+
+            <div class="step">
+              <div class="step-number">2</div>
+              <h3>Collecte & corrélation en continu</h3>
+              <p>
+                Les données sont agrégées, vérifiées, corrélées aux événements (ouverture de porte, chargement, réception…)
+                et normalisées pour les dashboards et l’IA.
+              </p>
+            </div>
+
+            <div class="step">
+              <div class="step-number">3</div>
+              <h3>Scellement blockchain & alertes</h3>
+              <p>
+                Les événements critiques sont scellés dans la blockchain. Les alertes sont envoyées par e-mail, SMS ou
+                intégrations (Teams, Slack, webhook).
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Industries -->
+      <section id="industries">
+        <div class="container">
+          <div class="section-header">
+            <div class="section-title-block">
+              <div class="section-tag">Secteurs</div>
+              <h2>Une base technologique, plusieurs verticales à fort enjeu.</h2>
+              <p>
+                Nous nous concentrons sur les environnements où quelques degrés ou quelques minutes de rupture peuvent
+                détruire des stocks, des marges et de la confiance.
+              </p>
+            </div>
+          </div>
+
+          <div class="grid-2">
+            <div class="industries-list">
+              <div class="industry-card">
+                <h3>Pharma & biotechs</h3>
+                <ul>
+                  <li>Vaccins, biothérapies, produits sensibles</li>
+                  <li>Conformité GMP / GDP</li>
+                  <li>Traçabilité auditable pour autorités & partenaires</li>
+                </ul>
+              </div>
+              <div class="industry-card">
+                <h3>Agroalimentaire & surgelés</h3>
+                <ul>
+                  <li>Prévention des ruptures de chaîne du froid</li>
+                  <li>Réduction du gaspillage & des réclamations</li>
+                  <li>Suivi par site, par lot, par transporteur</li>
+                </ul>
+              </div>
+              <div class="industry-card">
+                <h3>Logistique & 3PL</h3>
+                <ul>
+                  <li>Visibilité temps réel sur multi-clients</li>
+                  <li>Preuve de bonne conservation à la livraison</li>
+                  <li>Différenciation par la qualité de service</li>
+                </ul>
+              </div>
+              <div class="industry-card">
+                <h3>Data centers & infrastructures</h3>
+                <ul>
+                  <li>Surveillance fine des salles IT</li>
+                  <li>Vibrations, surchauffes, qualité de l’air</li>
+                  <li>Alertes anticipées pour ops & maintenance</li>
+                </ul>
+              </div>
+            </div>
+
+            <div class="industry-highlight">
+              <h3>Une approche orientée ROI, dès le pilote.</h3>
+              <p>
+                Nous privilégions des pilotes ciblés (un site, une ligne, une flotte restreinte), avec des indicateurs
+                clairs : réduction des pertes, baisse des interventions d’urgence, diminution des litiges, gain de temps
+                pour vos équipes qualité.
+              </p>
+              <div class="check-row">
+                <div class="check-dot"><span></span></div>
+                <span>En moyenne, un seul incident évité peut amortir le déploiement sur un premier site.</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Tech -->
+      <section id="tech">
+        <div class="container">
+          <div class="section-header">
+            <div class="section-title-block">
+              <div class="section-tag">Technologie</div>
+              <h2>Un socle moderne, sécurisé et extensible.</h2>
+              <p>
+                Enthalpy est conçu comme une brique d’infrastructure que vous pouvez faire évoluer : ajout de capteurs,
+                de sites, de partenaires, d’algorithmes – sans repartir de zéro.
+              </p>
+            </div>
+          </div>
+
+          <div class="tech-grid">
+            <div class="pill-card">
+              <strong>IoT</strong>Capteurs calibrables & firmware sécurisé
+            </div>
+            <div class="pill-card">
+              <strong>Connectivité</strong>5G · Wi-Fi · BLE · Satellite
+            </div>
+            <div class="pill-card">
+              <strong>Cloud</strong>Scalable & haute disponibilité
+            </div>
+            <div class="pill-card">
+              <strong>Blockchain</strong>Registre distribué auditable
+            </div>
+            <div class="pill-card">
+              <strong>API</strong>REST & webhooks pour intégrations
+            </div>
+            <div class="pill-card">
+              <strong>Security</strong>Chiffrement bout en bout
+            </div>
+            <div class="pill-card">
+              <strong>Dashboards</strong>Vue globale & drill-down
+            </div>
+            <div class="pill-card">
+              <strong>IA</strong>Détection de dérives & prédiction
+            </div>
+          </div>
+
+          <!-- CTA -->
+          <div class="cta">
+            <div>
+              <h2>Prêt à tester Enthalpy sur un premier site pilote ?</h2>
+              <p>
+                Nous vous accompagnons pour définir un pilote clair (objectifs, périmètre, ROI attendu) et déployer
+                capteurs & plateforme en quelques semaines.
+              </p>
+              <div class="cta-badges">
+                <div class="cta-badge">PoC structuré</div>
+                <div class="cta-badge">Intégration légère</div>
+                <div class="cta-badge">Équipe dédiée</div>
+              </div>
+            </div>
+            <div class="cta-right">
+              <a href="#contact" class="btn btn-primary">Parler à un expert</a>
+              <div style="margin-top:6px; opacity:0.8;">
+                Réponse sous 24h · Sans engagement
+              </div>
+            </div>
+          </div>
+
+          <!-- Contact -->
+          <div id="contact" class="contact">
+            <h3>Contact & démo</h3>
+            <p>
+              Dites-nous en quelques lignes vos enjeux (pharma, agro, logistique…) et nous reviendrons vers vous avec
+              une proposition de pilote adaptée.
+            </p>
+
+            <form>
+              <div class="form-grid">
+                <div class="form-field">
+                  <label for="name">Nom & prénom</label>
+                  <input id="name" type="text" placeholder="Votre nom" />
+                </div>
+                <div class="form-field">
+                  <label for="company">Entreprise</label>
+                  <input id="company" type="text" placeholder="Nom de votre organisation" />
+                </div>
+                <div class="form-field">
+                  <label for="email">E-mail professionnel</label>
+                  <input id="email" type="email" placeholder="vous@entreprise.com" />
+                </div>
+              </div>
+
+              <div class="form-field">
+                <label for="message">Enjeux & contexte</label>
+                <textarea id="message" placeholder="Ex. : suivi des chambres froides sur 3 sites, réduction des pertes, besoin de traçabilité audit..."></textarea>
+              </div>
+
+              <div class="form-footer">
+                <span>
+                  En cliquant, vous acceptez que nous vous contactions au sujet d’Enthalpy. Aucun spam, jamais.
+                </span>
+                <button type="submit" class="btn btn-primary">
+                  Envoyer ma demande
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+      <div class="container footer-inner">
+        <div>© <span id="year"></span> Enthalpy. Tous droits réservés.</div>
+        <div>
+          <a href="#top">Revenir en haut</a> ·
+          <a href="#">Mentions légales</a> ·
+          <a href="#">Confidentialité</a>
+        </div>
+      </div>
+    </footer>
+  </div>
+
+  <script>
+    // Met à jour l'année automatiquement
+    document.getElementById("year").textContent = new Date().getFullYear();
+  </script>
+</body>
+</html>
