@@ -170,17 +170,6 @@
       box-shadow: 0 18px 40px rgba(13, 83, 197, 0.6);
     }
 
-    .btn-ghost {
-      background: transparent;
-      border: 1px solid rgba(27, 115, 255, 0.16);
-      color: var(--text);
-    }
-
-    .btn-ghost:hover {
-      background: rgba(255, 255, 255, 0.9);
-      box-shadow: 0 8px 22px rgba(11, 46, 89, 0.14);
-    }
-
     /* Hero */
     .hero {
       padding: 50px 0 70px;
@@ -269,168 +258,296 @@
       color: var(--dark);
     }
 
-    /* Hero right card */
-    .hero-card {
-      border-radius: var(--radius-xl);
+    /* --- HERO DASHBOARD ADVANCED --- */
+
+    .hero-right {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .hero-dashboard {
+      width: 360px;
+      max-width: 100%;
+    }
+
+    .dash-shell {
       background: radial-gradient(circle at top, #ffffff, #e1efff 55%, #d2e5ff 100%);
+      border-radius: 22px;
+      padding: 18px 18px 16px;
       box-shadow: var(--shadow-soft);
-      padding: 22px 22px 20px;
+      border: 1px solid rgba(155, 189, 240, 0.8);
       position: relative;
       overflow: hidden;
     }
 
-    .hero-card-header {
+    .dash-topbar {
       display: flex;
-      align-items: center;
       justify-content: space-between;
-      margin-bottom: 18px;
-    }
-
-    .hero-chip {
-      font-size: 11px;
-      padding: 4px 12px;
-      border-radius: 999px;
-      background: rgba(255, 255, 255, 0.8);
-      border: 1px solid rgba(18, 92, 224, 0.22);
-      display: inline-flex;
       align-items: center;
-      gap: 6px;
-    }
-
-    .hero-chip-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 999px;
-      background: #24e38a;
-      box-shadow: 0 0 0 6px rgba(36, 227, 138, 0.2);
-    }
-
-    .hero-card-title {
-      font-size: 13px;
-      font-weight: 500;
-      color: var(--dark);
-    }
-
-    .hero-card-body {
-      display: grid;
-      grid-template-columns: 1.2fr 1fr;
-      gap: 16px;
-    }
-
-    .hero-metrics {
-      border-radius: 18px;
-      background: rgba(255, 255, 255, 0.94);
-      padding: 14px 16px;
-      box-shadow: var(--shadow-light);
-      position: relative;
-    }
-
-    .hero-metrics-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
       margin-bottom: 10px;
       font-size: 11px;
       color: var(--muted);
     }
 
-    .hero-metrics-header strong {
-      font-size: 12px;
-      color: var(--dark);
+    .dash-topbar-left {
+      display: flex;
+      align-items: center;
+      gap: 8px;
     }
 
-    .hero-metric-row {
+    .browser-dots {
+      display: flex;
+      gap: 4px;
+    }
+
+    .browser-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.9);
+    }
+
+    .browser-dot.red { background: #ff6b6b; }
+    .browser-dot.yellow { background: #ffc857; }
+    .browser-dot.green { background: #4ad66d; }
+
+    .live-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 3px 9px;
+      border-radius: 999px;
+      background: rgba(6, 19, 37, 0.86);
+      color: #fefefe;
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+    }
+
+    .live-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #24e38a;
+      box-shadow: 0 0 0 0 rgba(36, 227, 138, 0.45);
+      animation: pulse 1.7s infinite;
+    }
+
+    @keyframes pulse {
+      0% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(36, 227, 138, 0.55);
+      }
+      70% {
+        transform: scale(1.35);
+        box-shadow: 0 0 0 8px rgba(36, 227, 138, 0);
+      }
+      100% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(36, 227, 138, 0);
+      }
+    }
+
+    .dash-status {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 8px;
+      margin-bottom: 12px;
       font-size: 11px;
-    }
-
-    .hero-metric-row span {
       color: var(--muted);
     }
 
-    .hero-metric-value {
+    .dash-title-main {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--dark);
+    }
+
+    .sensors-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 9px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.85);
+      border: 1px solid rgba(27, 115, 255, 0.18);
+      font-size: 10px;
+    }
+
+    .sensors-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #24e38a;
+    }
+
+    .dash-grid {
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: 10px;
+    }
+
+    .dash-kpis {
+      background: rgba(255,255,255,0.96);
+      border-radius: 16px;
+      padding: 10px 12px;
+      box-shadow: var(--shadow-light);
+      border: 1px solid rgba(199,213,236,0.9);
+    }
+
+    .dash-kpis-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
+      font-size: 11px;
+    }
+
+    .dash-kpis-row:last-child {
+      margin-bottom: 0;
+    }
+
+    .dash-kpis-row span {
+      color: var(--muted);
+    }
+
+    .dash-value {
       font-weight: 600;
       font-size: 13px;
     }
 
-    .badge-good {
+    .dash-value.good {
       color: #1f9254;
     }
 
-    .badge-risk {
+    .dash-value.warn {
       color: #c7504f;
     }
 
-    .mini-chart {
-      height: 54px;
-      border-radius: 999px;
-      background: linear-gradient(135deg, rgba(27, 115, 255, 0.07), rgba(0, 224, 255, 0.12));
-      position: relative;
-      overflow: hidden;
-      margin-top: 6px;
+    .dash-chart-wrap {
+      margin-top: 8px;
     }
 
-    .mini-chart-line {
+    .dash-chart-labels {
+      display: flex;
+      justify-content: space-between;
+      font-size: 10px;
+      color: var(--muted);
+      margin-bottom: 4px;
+    }
+
+    .dash-chart {
+      position: relative;
+      height: 56px;
+      border-radius: 999px;
+      background: linear-gradient(135deg, rgba(27,115,255,0.08), rgba(0,224,255,0.16));
+      overflow: hidden;
+    }
+
+    .dash-chart-line {
       position: absolute;
       inset: 0;
-      background-image: linear-gradient(120deg, rgba(27, 115, 255, 0.6), rgba(0, 224, 255, 0.9));
-      opacity: 0.95;
-      clip-path: polygon(0% 65%, 14% 40%, 30% 58%, 48% 20%, 65% 34%, 80% 10%, 100% 24%, 100% 100%, 0% 100%);
+      background-image: linear-gradient(120deg, rgba(27,115,255,0.75), rgba(0,224,255,0.95));
+      clip-path: polygon(
+        0% 60%, 8% 45%, 16% 50%, 25% 30%, 35% 42%, 45% 20%, 55% 36%, 65% 18%,
+        75% 32%, 85% 15%, 100% 26%, 100% 100%, 0% 100%
+      );
+      animation: slide-wave 4.5s infinite linear;
+      transform-origin: left center;
     }
 
-    .hero-side {
+    @keyframes slide-wave {
+      0%   { transform: translateX(0); }
+      100% { transform: translateX(-12%); }
+    }
+
+    /* Mini-map */
+
+    .dash-map {
+      background: rgba(255,255,255,0.96);
+      border-radius: 16px;
+      padding: 10px 10px 9px;
+      box-shadow: var(--shadow-light);
+      border: 1px solid rgba(199,213,236,0.9);
+      font-size: 10px;
+      color: var(--muted);
       display: flex;
       flex-direction: column;
-      gap: 10px;
-      font-size: 11px;
-      color: var(--muted);
-    }
-
-    .hero-tag-list {
-      display: flex;
-      flex-wrap: wrap;
       gap: 6px;
     }
 
-    .tag {
-      padding: 4px 10px;
+    .dash-map-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .dash-map-title {
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--dark);
+    }
+
+    .dash-map-pill {
+      padding: 3px 7px;
       border-radius: 999px;
-      background: rgba(255, 255, 255, 0.9);
-      border: 1px solid rgba(14, 104, 228, 0.18);
+      background: rgba(27,115,255,0.1);
+      color: var(--primary);
+      font-size: 9px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .map-viewport {
+      position: relative;
+      border-radius: 10px;
+      background: radial-gradient(circle at 10% 0%, #ffffff, #d8e5ff 40%, #c3d6ff 100%);
+      height: 70px;
+      overflow: hidden;
+    }
+
+    .map-route {
+      position: absolute;
+      inset: 0;
+      border: 1px dashed rgba(27,115,255,0.4);
+      border-radius: 12px;
+      margin: 6px;
+    }
+
+    .map-node {
+      position: absolute;
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: #1b73ff;
+      box-shadow: 0 0 0 3px rgba(27,115,255,0.18);
+    }
+
+    .map-node.a { top: 18%; left: 18%; }
+    .map-node.b { top: 45%; right: 20%; }
+    .map-node.c { bottom: 14%; left: 40%; }
+
+    .map-node.live {
+      background: #24e38a;
+      box-shadow: 0 0 0 0 rgba(36,227,138,0.55);
+      animation: pulse 1.7s infinite;
+    }
+
+    .dash-events {
+      display: flex;
+      justify-content: space-between;
       font-size: 10px;
       color: var(--muted);
+      margin-top: 4px;
     }
 
-    .tag strong {
-      color: var(--primary);
+    .dash-events span strong {
+      color: var(--dark);
     }
 
-    .hero-badge {
-      border-radius: 14px;
-      background: rgba(6, 19, 37, 0.9);
-      color: #ffffff;
-      padding: 10px 12px;
-      font-size: 11px;
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-    }
+    /* Sections etc. (same as avant, juste textes en anglais) */
 
-    .hero-badge span:first-child {
-      font-size: 10px;
-      text-transform: uppercase;
-      letter-spacing: 0.12em;
-      opacity: 0.7;
-    }
-
-    .hero-badge strong {
-      font-size: 13px;
-    }
-
-    /* Trusted logos */
     .strip {
       padding: 6px 0 30px;
     }
@@ -466,7 +583,6 @@
       font-size: 11px;
     }
 
-    /* Sections */
     section {
       padding: 40px 0;
     }
@@ -499,7 +615,6 @@
       color: var(--muted);
     }
 
-    /* Features grid */
     .grid-3 {
       display: grid;
       grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -515,8 +630,6 @@
       display: flex;
       flex-direction: column;
       gap: 6px;
-      position: relative;
-      overflow: hidden;
     }
 
     .feature-icon {
@@ -560,7 +673,6 @@
       font-weight: 500;
     }
 
-    /* How it works */
     .steps {
       display: grid;
       grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -598,7 +710,6 @@
       color: var(--muted);
     }
 
-    /* Industries */
     .grid-2 {
       display: grid;
       grid-template-columns: 1.1fr 1fr;
@@ -676,7 +787,6 @@
       border-radius: 999px;
     }
 
-    /* Tech stack */
     .tech-grid {
       display: grid;
       grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -701,7 +811,6 @@
       margin-right: 4px;
     }
 
-    /* CTA */
     .cta {
       margin-top: 10px;
       padding: 26px 24px 24px;
@@ -755,25 +864,32 @@
       padding: 9px 18px;
     }
 
-    /* Contact */
+    /* Contact – centered card */
+
     .contact {
-      margin-top: 26px;
+      margin-top: 40px;
+      margin-bottom: 26px;
       padding: 20px 18px 18px;
       border-radius: var(--radius-xl);
       background: rgba(255, 255, 255, 0.95);
       box-shadow: var(--shadow-light);
       border: 1px solid rgba(210, 224, 245, 0.9);
+      max-width: 720px;
+      margin-left: auto;
+      margin-right: auto;
     }
 
     .contact h3 {
       font-size: 16px;
       margin-bottom: 4px;
+      text-align: center;
     }
 
     .contact p {
       font-size: 12px;
       color: var(--muted);
       margin-bottom: 10px;
+      text-align: center;
     }
 
     .form-grid {
@@ -850,7 +966,7 @@
         grid-template-columns: minmax(0, 1fr);
       }
 
-      .hero-card {
+      .hero-right {
         order: -1;
       }
 
@@ -982,66 +1098,80 @@
               </div>
             </div>
 
+            <!-- HERO DASHBOARD ADVANCED -->
             <div class="hero-right">
-              <div class="hero-card">
-                <div class="hero-card-header">
-                  <div>
-                    <div class="hero-card-title">Real-time view – Enthalpy Platform</div>
-                    <div style="font-size:11px; color:var(--muted);">Site: pharmaceutical warehouse · Lyon (FR)</div>
-                  </div>
-                  <div class="hero-chip">
-                    <div class="hero-chip-dot"></div>
-                    Live stream · 248 sensors
-                  </div>
-                </div>
-                <div class="hero-card-body">
-                  <div class="hero-metrics">
-                    <div class="hero-metrics-header">
-                      <span>Cold Room · CR-07</span>
-                      <strong>2–8 ℃ · Secure</strong>
-                    </div>
-
-                    <div class="hero-metric-row">
-                      <span>Average temperature</span>
-                      <div class="hero-metric-value badge-good">4.3 ℃</div>
-                    </div>
-                    <div class="hero-metric-row">
-                      <span>CO₂</span>
-                      <div class="hero-metric-value">684 ppm</div>
-                    </div>
-                    <div class="hero-metric-row">
-                      <span>Vibrations · Pallet #21</span>
-                      <div class="hero-metric-value badge-risk">Slight risk</div>
-                    </div>
-
-                    <div class="mini-chart">
-                      <div class="mini-chart-line"></div>
-                    </div>
-                  </div>
-
-                  <div class="hero-side">
-                    <div>
-                      <div style="font-size:11px; font-weight:500; color:var(--dark); margin-bottom:4px;">
-                        Events sealed on blockchain
+              <div class="hero-dashboard">
+                <div class="dash-shell">
+                  <div class="dash-topbar">
+                    <div class="dash-topbar-left">
+                      <div class="browser-dots">
+                        <span class="browser-dot red"></span>
+                        <span class="browser-dot yellow"></span>
+                        <span class="browser-dot green"></span>
                       </div>
-                      <p>
-                        Every critical event (temperature excursion, door opening, shock, drift) is timestamped,
-                        signed and written to a distributed ledger – ready for audits and regulatory reviews.
-                      </p>
+                      <span>live.enthalpy.cloud</span>
+                    </div>
+                    <div class="live-pill">
+                      <span class="live-dot"></span>
+                      <span>Live</span>
+                    </div>
+                  </div>
+
+                  <div class="dash-status">
+                    <div class="dash-title-main">Global Cold Chain – EU West</div>
+                    <div class="sensors-pill">
+                      <span class="sensors-dot"></span>
+                      <span>248 sensors online</span>
+                    </div>
+                  </div>
+
+                  <div class="dash-grid">
+                    <div class="dash-kpis">
+                      <div class="dash-kpis-row">
+                        <span>Average temperature</span>
+                        <span class="dash-value good">4.2 ℃</span>
+                      </div>
+                      <div class="dash-kpis-row">
+                        <span>CO₂ baseline</span>
+                        <span class="dash-value">680 ppm</span>
+                      </div>
+                      <div class="dash-kpis-row">
+                        <span>Excursions (24h)</span>
+                        <span class="dash-value warn">3 minor</span>
+                      </div>
+
+                      <div class="dash-chart-wrap">
+                        <div class="dash-chart-labels">
+                          <span>Last 2 hours</span>
+                          <span>Threshold 8 ℃</span>
+                        </div>
+                        <div class="dash-chart">
+                          <div class="dash-chart-line"></div>
+                        </div>
+                      </div>
                     </div>
 
-                    <div class="hero-tag-list">
-                      <div class="tag"><strong>GMP · GDP</strong> ready</div>
-                      <div class="tag">Alerts in &lt; 3 seconds</div>
-                      <div class="tag">Real-time APIs & dashboards</div>
-                      <div class="tag">Digital twin of your assets</div>
+                    <div class="dash-map">
+                      <div class="dash-map-header">
+                        <div class="dash-map-title">Live route overview</div>
+                        <div class="dash-map-pill">In transit</div>
+                      </div>
+                      <div class="map-viewport">
+                        <div class="map-route"></div>
+                        <div class="map-node a"></div>
+                        <div class="map-node b live"></div>
+                        <div class="map-node c"></div>
+                      </div>
+                      <div class="dash-events">
+                        <span><strong>FR · Lyon</strong> departure 08:12</span>
+                        <span><strong>BE · Brussels</strong> ETA 14:37</span>
+                      </div>
                     </div>
+                  </div>
 
-                    <div class="hero-badge">
-                      <span>Predictive insight</span>
-                      <strong>Prevent product loss instead of merely documenting it.</strong>
-                      <span>Stability scores updated continuously by site, route, pallet and batch.</span>
-                    </div>
+                  <div class="dash-events" style="margin-top:10px;">
+                    <span><strong>Next audit:</strong> GDP – 21 days</span>
+                    <span><strong>Alerts:</strong> pushed to Teams, email & API</span>
                   </div>
                 </div>
               </div>
@@ -1066,7 +1196,7 @@
         </div>
       </section>
 
-      <!-- Solution / Platform -->
+      <!-- Platform -->
       <section id="solutions">
         <div class="container">
           <div class="section-header">
