@@ -11,7 +11,7 @@
 <!-- Font -->
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
 
-<!-- Chart -->
+<!-- Chart.js -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
@@ -37,14 +37,14 @@ body{
 .container{
   max-width:1200px;
   margin:auto;
-  padding:0 24px;
+  padding:0 20px;
 }
 
-/* HEADER */
+/* ================= HEADER ================= */
 header{
   position:sticky;
   top:0;
-  z-index:10;
+  z-index:20;
   background:rgba(245,247,251,.95);
   backdrop-filter:blur(10px);
   border-bottom:1px solid rgba(0,0,0,.05);
@@ -53,19 +53,28 @@ nav{
   display:flex;
   justify-content:space-between;
   align-items:center;
-  padding:16px 0;
+  padding:14px 0;
 }
 .logo{
   display:flex;
   align-items:center;
-  gap:12px;
+  gap:10px;
 }
-.logo img{height:34px}
-.logo strong{color:var(--blue);font-size:20px}
-.logo span{font-size:11px;letter-spacing:.15em;color:var(--muted)}
+.logo img{height:32px}
+.logo strong{
+  color:var(--blue);
+  font-size:18px;
+}
+.logo span{
+  display:block;
+  font-size:11px;
+  letter-spacing:.18em;
+  color:#4a5d7a;
+  font-weight:600;
+}
 
 .btn{
-  padding:12px 26px;
+  padding:12px 22px;
   border-radius:999px;
   border:none;
   font-weight:600;
@@ -77,56 +86,56 @@ nav{
   box-shadow:0 14px 30px rgba(27,115,255,.4);
 }
 
-/* HERO */
+/* ================= HERO ================= */
 .hero{
-  padding:80px 0;
+  padding:56px 0 40px;
 }
 .hero-grid{
   display:grid;
-  grid-template-columns:1.2fr .8fr;
-  gap:40px;
+  grid-template-columns:1.1fr .9fr;
+  gap:36px;
+  align-items:center;
 }
 .hero h1{
-  font-size:52px;
-  line-height:1.05;
+  font-size:48px;
+  line-height:1.08;
 }
 .hero h1 span{color:var(--blue)}
 .hero p{
   max-width:520px;
   color:var(--muted);
-  font-size:17px;
-  margin:20px 0 30px;
+  font-size:16px;
+  margin:18px 0 26px;
 }
 
-/* DASHBOARD */
+/* ================= DASHBOARD ================= */
 .dashboard{
   background:var(--card);
-  border-radius:24px;
-  padding:20px;
+  border-radius:22px;
+  padding:18px;
   box-shadow:0 20px 50px rgba(6,19,37,.12);
 }
 .dashboard-header{
   display:flex;
   justify-content:space-between;
   align-items:center;
-  margin-bottom:14px;
+  margin-bottom:12px;
 }
 .status{
   display:flex;
   align-items:center;
   gap:8px;
-  font-size:13px;
+  font-size:12px;
 }
 .dot{
-  width:9px;height:9px;border-radius:50%;
+  width:8px;height:8px;border-radius:50%;
   background:var(--ok);
-  box-shadow:0 0 0 6px rgba(46,204,113,.2);
+  box-shadow:0 0 0 5px rgba(46,204,113,.2);
 }
-
 .dashboard-menu{
   display:flex;
   gap:6px;
-  margin-bottom:12px;
+  margin-bottom:10px;
 }
 .dashboard-menu button{
   flex:1;
@@ -134,34 +143,33 @@ nav{
   padding:8px;
   border-radius:10px;
   font-size:12px;
-  cursor:pointer;
   background:#eef3ff;
+  cursor:pointer;
 }
 .dashboard-menu button.active{
   background:var(--blue);
   color:#fff;
 }
-
 .alert{
   font-size:12px;
-  margin:8px 0;
+  margin:6px 0;
 }
 .alert.ok{color:var(--ok)}
 .alert.warn{color:var(--warn)}
 .alert.risk{color:var(--risk)}
+canvas{height:150px!important}
 
-canvas{height:140px!important}
-
-/* SECTIONS */
-section{padding:80px 0}
+/* ================= SECTIONS ================= */
+section{padding:56px 0}
 .section-title{
-  font-size:34px;
-  margin-bottom:16px;
+  font-size:32px;
+  margin-bottom:18px;
+  line-height:1.15;
 }
 .grid-3{
   display:grid;
   grid-template-columns:repeat(3,1fr);
-  gap:20px;
+  gap:18px;
 }
 .card{
   background:#fff;
@@ -169,8 +177,12 @@ section{padding:80px 0}
   padding:20px;
   box-shadow:0 14px 40px rgba(6,19,37,.08);
 }
+.card h3{
+  color:var(--blue);
+  margin-top:0;
+}
 
-/* POPUP */
+/* ================= POPUP ================= */
 .popup-overlay{
   display:none;
   position:fixed;
@@ -180,125 +192,49 @@ section{padding:80px 0}
   align-items:center;
   justify-content:center;
 }
-
-.popup-overlay.active{
-  display:flex;
-}
-
+.popup-overlay.active{display:flex}
 .popup{
   background:#fff;
   width:720px;
   max-width:95%;
-  height:80vh;
+  height:82vh;
   border-radius:20px;
-  padding:0;
+  overflow:hidden;
   position:relative;
-  box-shadow:0 30px 80px rgba(0,0,0,.35);
 }
-
 .popup iframe{
   width:100%;
   height:100%;
-  border-radius:20px;
   border:none;
 }
-
 .popup-close{
   position:absolute;
   top:10px;
-  right:14px;
-  background:#fff;
+  right:12px;
+  width:36px;
+  height:36px;
+  border-radius:50%;
   border:none;
+  background:#fff;
   font-size:22px;
   cursor:pointer;
-  z-index:10;
+  box-shadow:0 10px 24px rgba(0,0,0,.2);
 }
 
-
-/* RESPONSIVE */
-@media(max-width:900px){
+/* ================= MOBILE ================= */
+@media(max-width:768px){
   .hero-grid{grid-template-columns:1fr}
-  .hero h1{font-size:38px}
-}
-  /* =========================
-   MOBILE (Samsung / phones)
-   ========================= */
-@media (max-width: 600px){
-
-  /* Global */
-  body{font-size:15px}
-  .container{padding:0 16px}
-
-  /* Header */
-  nav{gap:10px}
-  .logo{gap:10px}
-  .logo img{height:30px}
-  .logo strong{font-size:18px}
-  .logo span{
-    display:block;
-    font-size:10px;
-    letter-spacing:.16em;
-    opacity:.95;
-  }
-  .btn{padding:11px 16px;font-size:13px}
-
-  /* Hero */
-  .hero{padding:44px 0}
-  .hero-grid{grid-template-columns:1fr;gap:18px}
-  .hero h1{font-size:34px;line-height:1.08}
-  .hero p{font-size:15px;margin:14px 0 18px}
-
-  /* Dashboard */
-  .dashboard{border-radius:18px;padding:14px}
-  .dashboard-header strong{font-size:14px}
-  .status{font-size:12px}
-  .dashboard-menu{gap:6px}
-  .dashboard-menu button{
-    padding:10px 8px;
-    font-size:12px;
-    border-radius:10px;
-  }
-  canvas{height:170px !important}
-
-  /* Sections */
-  section{padding:48px 0}
-  .section-title{font-size:24px;margin-bottom:12px}
-  .grid-3{grid-template-columns:1fr;gap:14px}
-  .card{padding:16px;border-radius:16px}
-
-  /* Popup overlay (centered) */
-  .popup-overlay{
-    padding:14px;
-    align-items:center;
-    justify-content:center;
-  }
-  .popup{
-    width:100%;
-    max-width:520px;
-    height:86vh;
-    border-radius:16px;
-    overflow:hidden;
-  }
-  .popup iframe{
-    height:100%;
-    border-radius:16px;
-  }
-  .popup-close{
-    top:8px;
-    right:10px;
-    width:36px;
-    height:36px;
-    border-radius:999px;
-    box-shadow:0 10px 24px rgba(0,0,0,.18);
-  }
+  .hero h1{font-size:34px}
+  .section-title{font-size:26px}
+  .grid-3{grid-template-columns:1fr}
+  .dashboard{margin-top:10px}
 }
 
-/* Optional: very small phones */
-@media (max-width: 360px){
+@media(max-width:420px){
   .hero h1{font-size:30px}
-  .dashboard-menu button{font-size:11px}
+  .logo strong{font-size:17px}
+  .logo span{font-size:10px}
 }
-
 </style>
 </head>
 
@@ -308,18 +244,10 @@ section{padding:80px 0}
   <div class="container">
     <nav>
       <div class="logo">
-        <img src="/assets/logo.png">
+        <img src="/assets/logo.png" alt="Enthalpy">
         <div>
-          <strong>Enthalpy</strong><br>
-          <span style="
-  font-size:12px;
-  letter-spacing:.18em;
-  color:#4a5d7a;
-  font-weight:600;
-">
-COLD & CRITICAL MONITORING
-</span>
-
+          <strong>Enthalpy</strong>
+          <span>COLD & CRITICAL MONITORING</span>
         </div>
       </div>
       <button class="btn btn-primary" onclick="openPopup()">Request pilot access</button>
@@ -332,7 +260,10 @@ COLD & CRITICAL MONITORING
     <div class="hero-grid">
 
       <div>
-        <h1>Sensors you can trust.<br><span>Evidence you can prove.</span></h1>
+        <h1>
+          Sensors you can trust.<br>
+          <span>Evidence you can prove.</span>
+        </h1>
         <p>
           Enthalpy combines <strong>IoT sensors</strong> and a
           <strong>blockchain-secured ledger</strong> to protect cold chains
@@ -348,10 +279,10 @@ COLD & CRITICAL MONITORING
         </div>
 
         <div class="dashboard-menu">
-          <button class="active" onclick="switchMetric('temp')">Temp</button>
-          <button onclick="switchMetric('hum')">Humidity</button>
-          <button onclick="switchMetric('vib')">Vibration</button>
-          <button onclick="switchMetric('co2')">CO₂</button>
+          <button class="active" onclick="switchMetric(event,'temp')">Temp</button>
+          <button onclick="switchMetric(event,'hum')">Humidity</button>
+          <button onclick="switchMetric(event,'vib')">Vibration</button>
+          <button onclick="switchMetric(event,'co2')">CO₂</button>
         </div>
 
         <div id="alert" class="alert ok">Status: Normal range</div>
@@ -362,41 +293,40 @@ COLD & CRITICAL MONITORING
   </div>
 </section>
 
-<!-- INDUSTRIES -->
 <section>
   <div class="container">
-    <h2 class="section-title">Industries where a few degrees cost millions</h2>
+    <h2 class="section-title">
+      Industries where a few degrees<br>cost millions
+    </h2>
+
     <div class="grid-3">
-      <div class="card"><h3 style="color:var(--blue)">Pharma & Biotech</h3><p>Audit-ready traceability.</p></div>
-      <div class="card"><h3 style="color:var(--blue)">Food & Frozen</h3><p>Prevent cold-chain failures.</p></div>
-      <div class="card"><h3 style="color:var(--blue)">Logistics & 3PL</h3><p>Proof of compliance.</p></div>
+      <div class="card">
+        <h3>Pharma & Biotech</h3>
+        <p>Audit-ready traceability.</p>
+      </div>
+      <div class="card">
+        <h3>Food & Frozen</h3>
+        <p>Prevent cold-chain failures.</p>
+      </div>
+      <div class="card">
+        <h3>Logistics & 3PL</h3>
+        <p>Proof of compliance.</p>
+      </div>
     </div>
   </div>
 </section>
 
-<!-- POPUP FORM -->
+<!-- POPUP -->
 <div id="popup-overlay" class="popup-overlay">
   <div class="popup">
     <button class="popup-close" onclick="closePopup()">×</button>
-
-    <iframe
-      id="earlyAccessForm"
-      src="https://docs.google.com/forms/d/e/1FAIpQLSeKqc44-iXAAwxkk2NEWLodNMkshh4u31NP1bWBRvmAcu1GIA/viewform?embedded=true"
-      width="100%"
-      height="720"
-      frameborder="0"
-      marginheight="0"
-      marginwidth="0">
+    <iframe id="earlyAccessForm"
+      src="https://docs.google.com/forms/d/e/1FAIpQLSeKqc44-iXAAwxkk2NEWLodNMkshh4u31NP1bWBRvmAcu1GIA/viewform?embedded=true">
     </iframe>
-
   </div>
 </div>
 
-
 <script>
-function openPopup(){document.getElementById('popup').style.display='block'}
-function closePopup(){document.getElementById('popup').style.display='none'}
-
 const ctx=document.getElementById('chart');
 let chart=new Chart(ctx,{
   type:'line',
@@ -411,12 +341,12 @@ let chart=new Chart(ctx,{
   options:{plugins:{legend:{display:false}}}
 });
 
-function switchMetric(type){
+function switchMetric(e,type){
   document.querySelectorAll('.dashboard-menu button')
     .forEach(b=>b.classList.remove('active'));
-  event.target.classList.add('active');
+  e.target.classList.add('active');
 
-  let data, text, cls;
+  let data,text,cls;
   if(type==='temp'){data=[4.2,4.4,5.8,6.1,5.2,4.6];text='Warning: Temperature excursion';cls='warn'}
   if(type==='hum'){data=[45,46,44,43,42,41];text='Status: Normal humidity';cls='ok'}
   if(type==='vib'){data=[1,2,8,6,2,1];text='Risk: Shock detected';cls='risk'}
@@ -429,26 +359,17 @@ function switchMetric(type){
   alert.textContent=text;
   alert.className='alert '+cls;
 }
-</script>
-<script>
-  const formURL =
-    "https://docs.google.com/forms/d/e/1FAIpQLSeKqc44-iXAAwxkk2NEWLodNMkshh4u31NP1bWBRvmAcu1GIA/viewform?embedded=true";
 
-  function openPopup() {
-    const iframe = document.getElementById("earlyAccessForm");
-
-    // Force reload of the form
-    iframe.src = "";
-    setTimeout(() => {
-      iframe.src = formURL;
-    }, 50);
-
-    document.getElementById("popup-overlay").classList.add("active");
-  }
-
-  function closePopup() {
-    document.getElementById("popup-overlay").classList.remove("active");
-  }
+const formURL="https://docs.google.com/forms/d/e/1FAIpQLSeKqc44-iXAAwxkk2NEWLodNMkshh4u31NP1bWBRvmAcu1GIA/viewform?embedded=true";
+function openPopup(){
+  const iframe=document.getElementById("earlyAccessForm");
+  iframe.src="";
+  setTimeout(()=>iframe.src=formURL,40);
+  document.getElementById("popup-overlay").classList.add("active");
+}
+function closePopup(){
+  document.getElementById("popup-overlay").classList.remove("active");
+}
 </script>
 
 </body>
