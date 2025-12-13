@@ -5,13 +5,8 @@
 <title>Enthalpy – Cold & Critical Monitoring</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
-<!-- Favicon -->
-<link rel="icon" type="image/png" href="/assets/favicon.png">
-
-<!-- Font -->
+<link rel="icon" href="/assets/favicon.png">
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
-
-<!-- Chart.js -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
@@ -20,6 +15,10 @@
   --dark:#0b1c33;
   --muted:#6c7a92;
   --bg:#f5f7fb;
+  --card:#ffffff;
+  --ok:#2ecc71;
+  --warn:#f1c40f;
+  --risk:#e74c3c;
 }
 *{box-sizing:border-box}
 body{
@@ -28,124 +27,149 @@ body{
   background:var(--bg);
   color:var(--dark);
 }
-.container{max-width:1200px;margin:auto;padding:0 24px}
+.container{
+  max-width:1200px;
+  margin:auto;
+  padding:0 24px;
+}
 
 /* HEADER */
 header{
-  position:sticky;top:0;z-index:10;
+  position:sticky;
+  top:0;
+  z-index:10;
   background:rgba(245,247,251,.95);
   backdrop-filter:blur(10px);
-  border-bottom:1px solid rgba(0,0,0,.05)
+  border-bottom:1px solid rgba(0,0,0,.05);
 }
 nav{
-  display:flex;align-items:center;justify-content:space-between;
-  padding:16px 0
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:16px 0;
 }
-.logo{display:flex;align-items:center;gap:12px}
-.logo img{height:36px}
-.logo strong{font-size:22px;color:var(--blue)}
+.logo{
+  display:flex;
+  align-items:center;
+  gap:12px;
+}
+.logo img{height:34px}
+.logo strong{color:var(--blue);font-size:20px}
 .logo span{font-size:11px;letter-spacing:.15em;color:var(--muted)}
 
 .btn{
-  padding:12px 26px;border-radius:999px;border:none;
-  font-weight:600;cursor:pointer
+  padding:12px 26px;
+  border-radius:999px;
+  border:none;
+  font-weight:600;
+  cursor:pointer;
 }
 .btn-primary{
   background:linear-gradient(135deg,#1b73ff,#00c8ff);
   color:#fff;
-  box-shadow:0 14px 30px rgba(27,115,255,.4)
+  box-shadow:0 14px 30px rgba(27,115,255,.4);
 }
 
 /* HERO */
-.hero{padding:90px 0}
+.hero{
+  padding:80px 0;
+}
+.hero-grid{
+  display:grid;
+  grid-template-columns:1.2fr .8fr;
+  gap:40px;
+}
 .hero h1{
-  font-size:56px;
+  font-size:52px;
   line-height:1.05;
-  margin-bottom:16px
 }
-.hero h1 span{
-  color:var(--blue)
-}
+.hero h1 span{color:var(--blue)}
 .hero p{
-  max-width:640px;
+  max-width:520px;
   color:var(--muted);
-  font-size:18px;
-  margin-bottom:36px
+  font-size:17px;
+  margin:20px 0 30px;
 }
 
 /* DASHBOARD */
 .dashboard{
-  margin-top:60px;
-  background:#fff;
-  border-radius:26px;
-  padding:30px;
-  box-shadow:0 20px 50px rgba(6,19,37,.12)
+  background:var(--card);
+  border-radius:24px;
+  padding:20px;
+  box-shadow:0 20px 50px rgba(6,19,37,.12);
 }
 .dashboard-header{
-  display:flex;justify-content:space-between;align-items:center;
-  margin-bottom:20px
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:14px;
 }
 .status{
-  display:flex;align-items:center;gap:8px;
-  font-size:14px
-}
-.dot{
-  width:10px;height:10px;border-radius:50%;
-  background:#28c76f;box-shadow:0 0 0 6px rgba(40,199,111,.25)
-}
-.dashboard-grid{
-  display:grid;
-  grid-template-columns:2fr 1fr;
-  gap:24px
-}
-.card{
-  background:#f9fbff;
-  border-radius:18px;
-  padding:18px
-}
-.map{
-  height:200px;
-  background:linear-gradient(135deg,#e3efff,#cfe2ff);
-  border-radius:14px;
   display:flex;
   align-items:center;
-  justify-content:center;
-  color:#1b73ff;
-  font-weight:600
+  gap:8px;
+  font-size:13px;
+}
+.dot{
+  width:9px;height:9px;border-radius:50%;
+  background:var(--ok);
+  box-shadow:0 0 0 6px rgba(46,204,113,.2);
 }
 
-/* MODAL */
-.modal{
-  position:fixed;inset:0;
-  background:rgba(0,0,0,.45);
-  display:none;
-  align-items:center;
-  justify-content:center;
-  z-index:100
+.dashboard-menu{
+  display:flex;
+  gap:6px;
+  margin-bottom:12px;
 }
-.modal-content{
+.dashboard-menu button{
+  flex:1;
+  border:none;
+  padding:8px;
+  border-radius:10px;
+  font-size:12px;
+  cursor:pointer;
+  background:#eef3ff;
+  color:var(--dark);
+}
+.dashboard-menu button.active{
+  background:var(--blue);
+  color:#fff;
+}
+
+.alert{
+  font-size:12px;
+  margin:8px 0;
+}
+.alert.ok{color:var(--ok)}
+.alert.warn{color:var(--warn)}
+.alert.risk{color:var(--risk)}
+
+canvas{height:140px !important}
+
+/* SECTIONS */
+section{
+  padding:80px 0;
+}
+.section-title{
+  font-size:34px;
+  margin-bottom:16px;
+}
+.grid-3{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:20px;
+}
+.card{
   background:#fff;
-  border-radius:22px;
-  padding:28px;
-  width:100%;
-  max-width:420px
+  border-radius:18px;
+  padding:20px;
+  box-shadow:0 14px 40px rgba(6,19,37,.08);
 }
-.modal-content h2{
-  margin-top:0
-}
-.modal-content input,
-.modal-content textarea{
-  width:100%;
-  margin-bottom:14px;
-  padding:12px;
-  border-radius:12px;
-  border:1px solid #ddd;
-  font-family:inherit
-}
-.close{
-  position:absolute;
-  top:18px;right:22px;
-  cursor:pointer;font-size:22px
+
+/* RESPONSIVE */
+@media(max-width:900px){
+  .hero-grid{grid-template-columns:1fr}
+  .hero h1{font-size:38px}
 }
 </style>
 </head>
@@ -162,78 +186,114 @@ nav{
           <span>COLD & CRITICAL MONITORING</span>
         </div>
       </div>
-      <button class="btn btn-primary" onclick="openModal()">Request pilot access</button>
+      <button class="btn btn-primary">Request pilot access</button>
     </nav>
   </div>
 </header>
 
+<!-- HERO -->
 <section class="hero">
   <div class="container">
-    <h1>
-      Prevent cold-chain failures<br>
-      <span>before they destroy value.</span>
-    </h1>
-    <p>
-      Real-time IoT monitoring combined with blockchain-sealed evidence
-      to protect high-value pharmaceutical, food and logistics assets.
-    </p>
+    <div class="hero-grid">
 
-    <!-- DASHBOARD -->
-    <div class="dashboard">
-      <div class="dashboard-header">
-        <strong>Live Operations Dashboard</strong>
-        <div class="status"><div class="dot"></div> Sensors online</div>
+      <!-- LEFT -->
+      <div>
+        <h1>
+          Sensors you can trust.<br>
+          <span>Evidence you can prove.</span>
+        </h1>
+        <p>
+          Enthalpy combines <strong>multi-sensor IoT monitoring</strong>
+          (temperature, humidity, vibration, CO₂)
+          with a <strong>blockchain-secured ledger</strong>
+          to protect cold chains and critical assets.
+        </p>
+        <p>
+          Sensors detect. Blockchain proves.
+        </p>
       </div>
 
-      <div class="dashboard-grid">
-        <div class="card">
-          <canvas id="chart"></canvas>
+      <!-- RIGHT DASHBOARD -->
+      <div class="dashboard">
+        <div class="dashboard-header">
+          <strong>Live Monitoring</strong>
+          <div class="status"><div class="dot"></div>Sensors online</div>
         </div>
-        <div class="card">
-          <div class="map">Global Asset Map</div>
+
+        <div class="dashboard-menu">
+          <button class="active" onclick="switchMetric('temp')">Temp</button>
+          <button onclick="switchMetric('hum')">Humidity</button>
+          <button onclick="switchMetric('vib')">Vibration</button>
+          <button onclick="switchMetric('co2')">CO₂</button>
         </div>
+
+        <div id="alert" class="alert ok">Status: Normal range</div>
+
+        <canvas id="chart"></canvas>
       </div>
+
     </div>
   </div>
 </section>
 
-<!-- MODAL FORM -->
-<div class="modal" id="modal">
-  <div class="modal-content">
-    <div class="close" onclick="closeModal()">×</div>
-    <h2>Request pilot access</h2>
-    <form action="FORM_ENDPOINT" method="POST">
-      <input type="text" name="name" placeholder="Full name" required>
-      <input type="text" name="company" placeholder="Company" required>
-      <input type="email" name="email" placeholder="Work email" required>
-      <textarea name="message" placeholder="Brief use case" required></textarea>
-      <button class="btn btn-primary" style="width:100%">Submit request</button>
-    </form>
+<!-- INDUSTRIES -->
+<section>
+  <div class="container">
+    <h2 class="section-title">Industries where a few degrees cost millions</h2>
+    <div class="grid-3">
+      <div class="card"><h3>Pharma & Biotech</h3><p>GMP/GDP, audit-ready traceability.</p></div>
+      <div class="card"><h3>Food & Frozen</h3><p>Prevent cold-chain breaks.</p></div>
+      <div class="card"><h3>Logistics & 3PL</h3><p>Proof of compliance.</p></div>
+    </div>
   </div>
-</div>
+</section>
+
+<!-- TECHNOLOGY -->
+<section>
+  <div class="container">
+    <h2 class="section-title">Technology built for trust</h2>
+    <div class="grid-3">
+      <div class="card"><h3>IoT Sensors</h3><p>Multi-physics, real-time, calibrated.</p></div>
+      <div class="card"><h3>Blockchain Ledger</h3><p>Tamper-proof, time-stamped evidence.</p></div>
+      <div class="card"><h3>Alerts & Analytics</h3><p>Detect issues before losses happen.</p></div>
+    </div>
+  </div>
+</section>
 
 <script>
-function openModal(){document.getElementById('modal').style.display='flex'}
-function closeModal(){document.getElementById('modal').style.display='none'}
-
-// CHART
 const ctx=document.getElementById('chart');
-new Chart(ctx,{
+let chart=new Chart(ctx,{
   type:'line',
   data:{
     labels:['00h','04h','08h','12h','16h','20h'],
     datasets:[{
-      label:'Temperature (°C)',
-      data:[4.2,4.1,4.4,5.6,4.8,4.3],
+      data:[4.2,4.3,4.5,4.4,4.6,4.3],
       borderColor:'#1b73ff',
       tension:.4
     }]
   },
-  options:{
-    plugins:{legend:{display:false}},
-    scales:{y:{beginAtZero:false}}
-  }
+  options:{plugins:{legend:{display:false}}}
 });
+
+function switchMetric(type){
+  document.querySelectorAll('.dashboard-menu button')
+    .forEach(b=>b.classList.remove('active'));
+  event.target.classList.add('active');
+
+  let data, alertText, alertClass;
+
+  if(type==='temp'){data=[4.2,4.4,5.8,6.1,5.2,4.6];alertText='Warning: Temperature excursion';alertClass='warn'}
+  if(type==='hum'){data=[45,46,44,43,42,41];alertText='Status: Normal humidity';alertClass='ok'}
+  if(type==='vib'){data=[1,2,8,6,2,1];alertText='Risk: Shock detected';alertClass='risk'}
+  if(type==='co2'){data=[400,420,480,650,720,680];alertText='Warning: CO₂ rising';alertClass='warn'}
+
+  chart.data.datasets[0].data=data;
+  chart.update();
+
+  const alert=document.getElementById('alert');
+  alert.textContent=alertText;
+  alert.className='alert '+alertClass;
+}
 </script>
 
 </body>
