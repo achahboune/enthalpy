@@ -14,6 +14,7 @@ export default function Page() {
 
   const [metric, setMetric] = useState<Metric>("temp")
   const [popupOpen, setPopupOpen] = useState(false)
+  const [iframeSrc, setIframeSrc] = useState("")
 
   const metricConfig = useMemo(() => {
     const cfg: Record<
@@ -21,42 +22,56 @@ export default function Page() {
       {
         label: string
         data: number[]
-        alert: string
-        tone: "ok" | "warn" | "risk"
-        colorVar: "--temp" | "--hum" | "--vib" | "--co2"
+        status: string
+        cls: "ok" | "warn" | "risk"
+        tab: { bg: string; fg: string; border: string }
+        line: string
       }
     > = {
       temp: {
         label: "Temp",
-        data: [4.2, 4.3, 5.6, 6.1, 5.2, 4.6],
-        alert: "Temperature excursion detected",
-        tone: "warn",
-        colorVar: "--temp",
+        data: [4.2, 4.3, 5.9, 6.2, 5.3, 4.7],
+        status: "Temperature excursion detected",
+        cls: "warn",
+        tab: { bg: "#f59e0b", fg: "#0b1c33", border: "rgba(245,158,11,.45)" },
+        line: "#f59e0b",
       },
       hum: {
         label: "Humidity",
-        data: [45, 46, 45, 44, 43, 42],
-        alert: "Humidity stable",
-        tone: "ok",
-        colorVar: "--hum",
+        data: [45, 46, 44, 43, 42, 41],
+        status: "Humidity stable",
+        cls: "ok",
+        tab: { bg: "#eaf1ff", fg: "#0b1c33", border: "rgba(27,115,255,.20)" },
+        line: "#1b73ff",
       },
       vib: {
         label: "Vibration",
         data: [1, 2, 8, 6, 2, 1],
-        alert: "Critical shock detected",
-        tone: "risk",
-        colorVar: "--vib",
+        status: "Critical shock detected",
+        cls: "risk",
+        tab: { bg: "#1b73ff", fg: "#ffffff", border: "rgba(27,115,255,.45)" },
+        line: "#1b73ff",
       },
       co2: {
         label: "CO₂",
-        data: [410, 420, 460, 620, 720, 680],
-        alert: "CO₂ level rising",
-        tone: "warn",
-        colorVar: "--co2",
+        data: [400, 420, 480, 650, 720, 680],
+        status: "CO₂ level rising",
+        cls: "warn",
+        tab: { bg: "#eaf1ff", fg: "#0b1c33", border: "rgba(27,115,255,.20)" },
+        line: "#1b73ff",
       },
     }
     return cfg
   }, [])
+
+  function openPopup() {
+    setPopupOpen(true)
+    setIframeSrc("")
+    setTimeout(() => setIframeSrc(FORM_URL), 40)
+  }
+  function closePopup() {
+    setPopupOpen(false)
+  }
 
   // Create chart once
   useEffect(() => {
@@ -64,29 +79,27 @@ export default function Page() {
     const ctx = canvasRef.current.getContext("2d")
     if (!ctx) return
 
-    const initial = metricConfig.temp
-
     chartRef.current = new Chart(ctx, {
       type: "line",
       data: {
         labels: ["00h", "04h", "08h", "12h", "16h", "20h"],
         datasets: [
           {
-            data: initial.data as any,
-            borderColor: getComputedStyle(document.documentElement).getPropertyValue("--temp").trim() || "#f59e0b",
-            tension: 0.4,
+            data: metricConfig.temp.data,
+            borderColor: metricConfig.temp.line,
             borderWidth: 2,
             pointRadius: 0,
+            tension: 0.4,
           },
         ],
       },
       options: {
         responsive: true,
         maintainAspectRatio: false,
-        plugins: { legend: { display: false }, tooltip: { enabled: true } },
+        plugins: { legend: { display: false } },
         scales: {
-          x: { grid: { display: false }, ticks: { color: "rgba(10,20,40,.55)" } },
-          y: { grid: { color: "rgba(0,0,0,.06)" }, ticks: { color: "rgba(10,20,40,.55)" } },
+          x: { grid: { display: false } },
+          y: { grid: { color: "rgba(0,0,0,.06)" } },
         },
       },
     })
@@ -101,17 +114,12 @@ export default function Page() {
   useEffect(() => {
     const c = chartRef.current
     if (!c) return
-
-    const color = getComputedStyle(document.documentElement)
-      .getPropertyValue(metricConfig[metric].colorVar)
-      .trim()
-
     c.data.datasets[0].data = metricConfig[metric].data as any
-    ;(c.data.datasets[0] as any).borderColor = color || "#1b73ff"
+    ;(c.data.datasets[0] as any).borderColor = metricConfig[metric].line
     c.update()
   }, [metric, metricConfig])
 
-  const alertTone = metricConfig[metric].tone
+  const alertCls = metricConfig[metric].cls
 
   return (
     <>
@@ -122,39 +130,39 @@ export default function Page() {
           --muted: #6c7a92;
           --bg: #f5f7fb;
           --card: #ffffff;
-
-          /* Metric colors (demandé : temp orange, vib rouge, etc.) */
-          --temp: #f59e0b; /* orange */
-          --hum: #06b6d4;  /* cyan */
-          --vib: #ef4444;  /* red */
-          --co2: #a855f7;  /* purple */
           --ok: #22c55e;
           --warn: #f59e0b;
           --risk: #ef4444;
         }
-
-        * { box-sizing: border-box; }
-        html, body { height: 100%; }
+        * {
+          box-sizing: border-box;
+        }
         body {
           margin: 0;
-          font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
-          background:
-            radial-gradient(1200px 650px at 70% 0%, rgba(27,115,255,.14), transparent 60%),
+          font-family: Inter, system-ui, sans-serif;
+          background: radial-gradient(
+              1200px 600px at 70% 0%,
+              rgba(27, 115, 255, 0.12),
+              transparent 60%
+            ),
             var(--bg);
           color: var(--dark);
         }
-
-        .container { width: 100%; max-width: 1200px; margin: 0 auto; padding: 0 24px; }
+        .container {
+          width: 100%;
+          max-width: 1240px;
+          margin: 0 auto;
+          padding: 0 24px;
+        }
 
         header {
           position: sticky;
           top: 0;
-          z-index: 50;
+          z-index: 20;
           background: rgba(245, 247, 251, 0.92);
           backdrop-filter: blur(10px);
           border-bottom: 1px solid rgba(0, 0, 0, 0.06);
         }
-
         nav {
           display: flex;
           justify-content: space-between;
@@ -162,25 +170,27 @@ export default function Page() {
           padding: 14px 0;
         }
 
-        .brand {
+        .logo {
           display: flex;
           align-items: center;
-          gap: 10px;
-          min-width: 180px;
+          gap: 12px;
         }
-        .brand img {
-          height: 34px;
+        .logo img {
+          height: 52px;
           width: auto;
-          display: block;
         }
-        .brand strong { font-weight: 800; letter-spacing: -0.01em; }
-        .brand small {
+        .logo strong {
+          color: var(--dark);
+          font-size: 18px;
+          line-height: 1;
+        }
+        .logo span {
           display: block;
-          font-size: 10px;
-          letter-spacing: 0.18em;
-          color: rgba(10, 25, 45, 0.55);
-          font-weight: 700;
           margin-top: 2px;
+          font-size: 11px;
+          letter-spacing: 0.18em;
+          color: #4a5d7a;
+          font-weight: 700;
           white-space: nowrap;
         }
 
@@ -190,21 +200,15 @@ export default function Page() {
           border: none;
           font-weight: 800;
           cursor: pointer;
-          transition: transform .12s ease, box-shadow .12s ease;
-          white-space: nowrap;
         }
-        .btn:active { transform: translateY(1px); }
         .btn-primary {
           background: linear-gradient(135deg, #1b73ff, #00c8ff);
           color: #fff;
-          box-shadow: 0 14px 30px rgba(27,115,255,.35);
+          box-shadow: 0 14px 30px rgba(27, 115, 255, 0.35);
         }
 
         .hero {
-          padding: 34px 0 18px;
-          min-height: calc(100dvh - 70px);
-          display: flex;
-          align-items: center;
+          padding: 46px 0 26px;
         }
         .hero-grid {
           display: grid;
@@ -213,125 +217,144 @@ export default function Page() {
           align-items: start;
         }
 
-        .hero h1 {
-          font-size: clamp(40px, 4.4vw, 70px);
-          line-height: 1.03;
-          margin: 0 0 14px;
-          letter-spacing: -0.03em;
+        h1 {
+          font-size: clamp(38px, 4.4vw, 66px);
+          margin: 0;
+          letter-spacing: -0.02em;
+          line-height: 1.02;
         }
-        .hero h1 span { color: var(--blue); }
+        h1 span {
+          color: var(--blue);
+        }
 
-        .hero p {
-          margin: 0 0 12px;
-          max-width: 620px;
-          color: rgba(10, 25, 45, 0.68);
+        .hero-copy {
+          margin-top: 14px;
+          color: #2b3d5a;
           font-weight: 600;
+          max-width: 560px;
           line-height: 1.55;
+          font-size: 14px;
         }
-        .hero .microline {
-          margin-top: 10px;
-          color: rgba(27, 115, 255, 0.9);
+        .hero-copy strong {
+          color: var(--dark);
+        }
+        .hero-tagline {
+          margin-top: 12px;
+          color: var(--blue);
           font-weight: 800;
           font-size: 13px;
         }
 
-        /* Live monitoring card */
-        .monitor {
+        .dashboard {
           background: var(--card);
-          border-radius: 20px;
-          box-shadow: 0 22px 60px rgba(6,19,37,.12);
-          border: 1px solid rgba(0,0,0,.06);
-          padding: 14px 14px 12px;
+          border-radius: 18px;
+          padding: 16px;
+          box-shadow: 0 22px 60px rgba(6, 19, 37, 0.12);
+          border: 1px solid rgba(0, 0, 0, 0.05);
         }
-        .monitor-top {
+
+        .dashboard-header {
           display: flex;
           justify-content: space-between;
           align-items: center;
-          margin-bottom: 8px;
-          padding: 2px 2px 0;
+          margin-bottom: 10px;
         }
-        .monitor-title { font-weight: 900; font-size: 13px; }
-        .online {
+
+        .status {
           display: flex;
           align-items: center;
           gap: 8px;
           font-size: 12px;
-          color: rgba(10,25,45,.65);
-          font-weight: 800;
+          color: #2b3d5a;
+          font-weight: 700;
         }
         .dot {
-          width: 8px; height: 8px; border-radius: 50%;
+          width: 8px;
+          height: 8px;
+          border-radius: 50%;
           background: var(--ok);
-          box-shadow: 0 0 0 5px rgba(34,197,94,.18);
+          box-shadow: 0 0 0 5px rgba(34, 197, 94, 0.18);
         }
 
         .tabs {
-          display: grid;
-          grid-template-columns: repeat(4, 1fr);
+          display: flex;
           gap: 8px;
-          margin: 10px 0 10px;
+          margin: 10px 0 8px;
         }
         .tab {
-          border: 1px solid rgba(0,0,0,.06);
-          border-radius: 999px;
+          flex: 1;
+          border: 1px solid rgba(0, 0, 0, 0.08);
           padding: 8px 10px;
+          border-radius: 999px;
           font-size: 12px;
-          font-weight: 900;
           background: #eef3ff;
           cursor: pointer;
-          transition: background .12s ease, color .12s ease, border-color .12s ease;
-        }
-        .tab.active { color: #fff; border-color: rgba(0,0,0,.1); }
-
-        .tab.temp.active { background: var(--temp); }
-        .tab.hum.active  { background: var(--hum); }
-        .tab.vib.active  { background: var(--blue); } /* visuel comme ta capture */
-        .tab.co2.active  { background: var(--co2); }
-
-        .chartWrap { height: 165px; }
-        .statusline {
-          margin-top: 10px;
           font-weight: 900;
-          font-size: 13px;
-          color: rgba(10,25,45,.82);
-        }
-
-        .pillrow {
-          margin-top: 6px;
           display: flex;
-          flex-wrap: wrap;
-          gap: 8px;
-          font-size: 11px;
-          font-weight: 900;
+          align-items: center;
+          justify-content: center;
         }
-        .pill {
-          padding: 6px 10px;
-          border-radius: 999px;
-          background: rgba(27,115,255,.08);
-          border: 1px solid rgba(27,115,255,.18);
-          color: rgba(27,115,255,.95);
+        .tab.active {
+          border-color: transparent;
         }
-        .pill.warn { background: rgba(245,158,11,.12); border-color: rgba(245,158,11,.25); color: #b45309; }
-        .pill.risk { background: rgba(239,68,68,.12); border-color: rgba(239,68,68,.25); color: #b91c1c; }
-        .pill.ok   { background: rgba(34,197,94,.12); border-color: rgba(34,197,94,.22); color: #15803d; }
 
-        /* Section: From sensors to proof */
-        .section {
-          padding: 10px 0 0;
+        .chartWrap {
+          height: 150px;
+          margin-top: 4px;
         }
+
+        .alertline {
+          margin-top: 10px;
+          font-weight: 800;
+          font-size: 12px;
+        }
+        .alertline.ok {
+          color: var(--ok);
+        }
+        .alertline.warn {
+          color: #b45309;
+        }
+        .alertline.risk {
+          color: var(--risk);
+        }
+
+        .chips {
+          display: flex;
+          gap: 10px;
+          flex-wrap: wrap;
+          margin-top: 6px;
+        }
+        .chip {
+          display: inline-flex;
+          align-items: center;
+          gap: 6px;
+          border-radius: 999px;
+          padding: 6px 10px;
+          font-size: 11px;
+          font-weight: 800;
+          background: rgba(0, 0, 0, 0.04);
+          border: 1px solid rgba(0, 0, 0, 0.06);
+          color: #0b1c33;
+        }
+        .chip .cDot {
+          width: 8px;
+          height: 8px;
+          border-radius: 50%;
+        }
+
         .centerTitle {
           text-align: center;
-          margin: 22px 0 6px;
-          font-size: 20px;
-          font-weight: 1000;
-          letter-spacing: -0.02em;
+          font-weight: 900;
+          font-size: 18px;
+          margin: 24px 0 6px;
+          letter-spacing: -0.01em;
         }
         .centerSub {
           text-align: center;
-          margin: 0 auto 18px;
+          margin: 0 auto 22px;
           max-width: 720px;
-          color: rgba(10,25,45,.6);
-          font-weight: 700;
+          color: var(--muted);
+          font-weight: 600;
           font-size: 13px;
         }
 
@@ -339,90 +362,131 @@ export default function Page() {
           display: grid;
           grid-template-columns: repeat(3, 1fr);
           gap: 18px;
-          margin-top: 8px;
         }
-        .card {
+        .stepCard {
           background: #fff;
-          border-radius: 16px;
-          padding: 16px 16px 14px;
-          border: 1px solid rgba(0,0,0,.06);
-          box-shadow: 0 14px 40px rgba(6,19,37,.08);
-          position: relative;
+          border-radius: 14px;
+          padding: 18px 18px 16px;
+          box-shadow: 0 14px 40px rgba(6, 19, 37, 0.08);
+          border: 1px solid rgba(0, 0, 0, 0.05);
+          min-height: 96px;
+          display: grid;
+          grid-template-columns: 10px 1fr;
+          gap: 12px;
+          align-items: start;
         }
-        .accent {
-          position: absolute;
-          left: 0; top: 12px; bottom: 12px;
+        .bar {
           width: 4px;
-          border-radius: 99px;
+          border-radius: 999px;
+          height: 100%;
         }
-        .accent.blue { background: var(--blue); }
-        .accent.amber { background: var(--temp); }
-        .accent.green { background: var(--ok); }
+        .stepTitle {
+          font-weight: 900;
+          margin: 0 0 4px;
+          font-size: 13px;
+        }
+        .stepText {
+          margin: 0;
+          color: #2b3d5a;
+          font-weight: 600;
+          font-size: 12px;
+          line-height: 1.4;
+        }
 
-        .card h3 { margin: 0 0 6px; font-size: 13px; font-weight: 1000; }
-        .card p { margin: 0; color: rgba(10,25,45,.62); font-weight: 700; font-size: 12px; }
-
-        /* Industries */
-        .industriesTitle {
+        .industryTitle {
           text-align: center;
-          margin: 22px 0 16px;
+          font-weight: 900;
           font-size: 20px;
-          font-weight: 1000;
-          letter-spacing: -0.02em;
+          margin: 26px 0 14px;
+          letter-spacing: -0.01em;
         }
-        .industry h4 { margin: 0 0 6px; color: var(--blue); font-weight: 1000; }
-        .industry p { margin: 0; color: rgba(10,25,45,.62); font-weight: 700; font-size: 12px; }
+        .industryCard {
+          background: #fff;
+          border-radius: 14px;
+          padding: 18px;
+          box-shadow: 0 14px 40px rgba(6, 19, 37, 0.08);
+          border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+        .industryCard h3 {
+          margin: 0 0 6px;
+          color: var(--blue);
+          font-weight: 900;
+          font-size: 14px;
+        }
+        .industryCard p {
+          margin: 0;
+          color: #2b3d5a;
+          font-weight: 600;
+          font-size: 12px;
+        }
 
-        /* Footer */
-        footer {
-          padding: 26px 0 34px;
+        .footer {
           text-align: center;
-          color: rgba(10,25,45,.65);
+          padding: 26px 0 34px;
+          color: #2b3d5a;
+          font-weight: 700;
+          font-size: 12px;
+        }
+        .footer .email {
+          font-weight: 900;
+          color: #0b1c33;
+          font-size: 13px;
+        }
+        .footer .loc {
+          margin-top: 6px;
+          color: #6c7a92;
           font-weight: 800;
         }
-        footer .email { color: rgba(10,25,45,.85); }
-        footer .loc { margin-top: 6px; font-size: 12px; }
 
-        /* Popup */
         .popup-overlay {
+          display: none;
           position: fixed;
           inset: 0;
-          background: rgba(0,0,0,.55);
-          display: none;
+          background: rgba(0, 0, 0, 0.55);
+          z-index: 9999;
           align-items: center;
           justify-content: center;
-          z-index: 9999;
           padding: 18px;
         }
-        .popup-overlay.active { display: flex; }
+        .popup-overlay.active {
+          display: flex;
+        }
         .popup {
-          width: 860px;
+          background: #fff;
+          width: 820px;
           max-width: 100%;
           height: 86vh;
-          background: #fff;
-          border-radius: 20px;
+          border-radius: 18px;
           overflow: hidden;
           position: relative;
-          box-shadow: 0 30px 90px rgba(0,0,0,.35);
+          box-shadow: 0 30px 90px rgba(0, 0, 0, 0.25);
         }
-        .popup iframe { width: 100%; height: 100%; border: none; }
+        .popup iframe {
+          width: 100%;
+          height: 100%;
+          border: none;
+        }
         .popup-close {
           position: absolute;
-          top: 10px; right: 12px;
-          width: 40px; height: 40px;
+          top: 10px;
+          right: 12px;
+          width: 40px;
+          height: 40px;
           border-radius: 999px;
           border: none;
           background: #fff;
           font-size: 22px;
           cursor: pointer;
-          box-shadow: 0 10px 24px rgba(0,0,0,.2);
+          box-shadow: 0 10px 24px rgba(0, 0, 0, 0.2);
         }
 
         @media (max-width: 980px) {
-          .hero { min-height: auto; }
-          .hero-grid { grid-template-columns: 1fr; }
-          .grid3 { grid-template-columns: 1fr; }
-          nav { gap: 12px; }
+          .hero-grid {
+            grid-template-columns: 1fr;
+          }
+          .grid3 {
+            grid-template-columns: 1fr;
+          }
         }
       `}</style>
 
@@ -430,15 +494,16 @@ export default function Page() {
       <header>
         <div className="container">
           <nav>
-            <div className="brand">
-              <img src="/assets/logo.png" alt="Enthalpy logo" />
+            <div className="logo">
+              <img src="/assets/logo.png" alt="Enthalpy" />
               <div>
                 <strong>Enthalpy</strong>
-                <small>COLD &amp; CRITICAL MONITORING</small>
+                <span>COLD &amp; CRITICAL MONITORING</span>
               </div>
             </div>
 
-            <button className="btn btn-primary" onClick={() => setPopupOpen(true)}>
+            {/* ✅ GARDÉ : le SEUL bouton */}
+            <button className="btn btn-primary" onClick={openPopup}>
               Request pilot access
             </button>
           </nav>
@@ -456,146 +521,165 @@ export default function Page() {
                 <span>Evidence you can prove.</span>
               </h1>
 
-              {/* PROBLEME -> SOLUTION (clair + net dès l’ouverture) */}
-              <p>
-                Capture, trace and alert on <strong>temperature</strong>, <strong>humidity</strong>, <strong>vibration</strong> and <strong>CO₂</strong> in real time.
+              <div className="hero-copy">
+                Capture, trace and alert on <strong>temperature</strong>,{" "}
+                <strong>humidity</strong>, <strong>vibration</strong> and{" "}
+                <strong>CO₂</strong> in real time.
                 <br />
-                Seal incidents into <strong>audit-ready proof</strong> on a blockchain-secured event ledger.
+                Seal incidents into <strong>audit-ready proof</strong> on a{" "}
+                <strong>blockchain-secured event ledger</strong>.
                 <br />
-                Use that proof to support compliance, insurance claims — and <strong>blockchain-triggered payments</strong>.
-              </p>
-
-              <div className="microline">From sensors → proof → payment.</div>
-
-              <div style={{ marginTop: 14 }}>
-                <button className="btn btn-primary" onClick={() => setPopupOpen(true)}>
-                  Request pilot access
-                </button>
+                Use that proof to support compliance, insurance claims — and{" "}
+                <strong> blockchain-triggered payments</strong>.
               </div>
+
+              <div className="hero-tagline">From sensors → proof → payment.</div>
+
+              {/* ❌ SUPPRIMÉ : bouton du hero */}
             </div>
 
-            <div className="monitor">
-              <div className="monitor-top">
-                <div className="monitor-title">Live monitoring</div>
-                <div className="online">
+            {/* Dashboard */}
+            <div className="dashboard">
+              <div className="dashboard-header">
+                <strong>Live monitoring</strong>
+                <div className="status">
                   <span className="dot" />
                   Sensors online
                 </div>
               </div>
 
               <div className="tabs">
-                <button
-                  className={`tab temp ${metric === "temp" ? "active" : ""}`}
-                  onClick={() => setMetric("temp")}
-                >
-                  Temp
-                </button>
-                <button
-                  className={`tab hum ${metric === "hum" ? "active" : ""}`}
-                  onClick={() => setMetric("hum")}
-                >
-                  Humidity
-                </button>
-                <button
-                  className={`tab vib ${metric === "vib" ? "active" : ""}`}
-                  onClick={() => setMetric("vib")}
-                >
-                  Vibration
-                </button>
-                <button
-                  className={`tab co2 ${metric === "co2" ? "active" : ""}`}
-                  onClick={() => setMetric("co2")}
-                >
-                  CO₂
-                </button>
+                {(["temp", "hum", "vib", "co2"] as Metric[]).map((m) => {
+                  const active = metric === m
+                  const tab = metricConfig[m].tab
+                  return (
+                    <button
+                      key={m}
+                      className={`tab ${active ? "active" : ""}`}
+                      onClick={() => setMetric(m)}
+                      style={
+                        active
+                          ? {
+                              background: tab.bg,
+                              color: tab.fg,
+                              borderColor: tab.border,
+                            }
+                          : undefined
+                      }
+                    >
+                      {metricConfig[m].label}
+                    </button>
+                  )
+                })}
               </div>
 
               <div className="chartWrap">
                 <canvas ref={canvasRef} />
               </div>
 
-              <div className="statusline">{metricConfig[metric].alert}</div>
+              <div className={`alertline ${alertCls}`}>
+                {metricConfig[metric].status}
+              </div>
 
-              {/* Badges (preuve + paiement) */}
-              <div className="pillrow">
-                <span className={`pill ${alertTone}`}>● Incident captured</span>
-                <span className="pill warn">🔒 Blockchain-sealed</span>
-                <span className="pill ok">💸 Payment ready</span>
+              <div className="chips">
+                <span className="chip">
+                  <span
+                    className="cDot"
+                    style={{ background: "var(--warn)" }}
+                  />
+                  Incident captured
+                </span>
+                <span className="chip">
+                  <span
+                    className="cDot"
+                    style={{ background: "var(--warn)" }}
+                  />
+                  Blockchain-sealed
+                </span>
+                <span className="chip">
+                  <span className="cDot" style={{ background: "var(--ok)" }} />
+                  Payment ready
+                </span>
               </div>
             </div>
           </div>
 
-          {/* FROM SENSORS TO PROOF */}
-          <div className="section">
-            <div className="centerTitle">From sensors to proof</div>
-            <div className="centerSub">
-              Enthalpy turns real-world incidents into trusted digital evidence that can trigger compliance actions or payments.
-            </div>
+          {/* From sensors to proof */}
+          <div className="centerTitle">From sensors to proof</div>
+          <div className="centerSub">
+            Enthalpy turns real-world incidents into trusted digital evidence that
+            can trigger compliance actions or payments.
+          </div>
 
-            <div className="grid3">
-              <div className="card">
-                <span className="accent blue" />
-                <h3>🔔 Sensor event</h3>
-                <p>Temperature, vibration or CO₂ threshold exceeded.</p>
-              </div>
-
-              <div className="card">
-                <span className="accent amber" />
-                <h3>🔒 Blockchain proof</h3>
-                <p>Event is hashed, timestamped and sealed on-chain.</p>
-              </div>
-
-              <div className="card">
-                <span className="accent green" />
-                <h3>✅ Compliance / Payment</h3>
-                <p>Audit, penalty or automated payout is triggered.</p>
+          <div className="grid3">
+            <div className="stepCard">
+              <div className="bar" style={{ background: "#1b73ff" }} />
+              <div>
+                <p className="stepTitle">🔔 Sensor event</p>
+                <p className="stepText">
+                  Temperature, vibration or CO₂ threshold exceeded.
+                </p>
               </div>
             </div>
 
-            {/* INDUSTRIES (remonté, centré, sans vide) */}
-            <div className="industriesTitle">Industries where a few degrees cost millions</div>
-
-            <div className="grid3">
-              <div className="card industry">
-                <h4>Pharma &amp; Biotech</h4>
-                <p>Audit-ready traceability.</p>
-              </div>
-              <div className="card industry">
-                <h4>Food &amp; Frozen</h4>
-                <p>Prevent cold-chain failures.</p>
-              </div>
-              <div className="card industry">
-                <h4>Logistics &amp; 3PL</h4>
-                <p>Proof of compliance.</p>
+            <div className="stepCard">
+              <div className="bar" style={{ background: "#f59e0b" }} />
+              <div>
+                <p className="stepTitle">🔒 Blockchain proof</p>
+                <p className="stepText">
+                  Event is hashed, timestamped and sealed on-chain.
+                </p>
               </div>
             </div>
 
-            {/* FOOTER (email + Tangier, Morocco) */}
-            <footer>
-              <div className="email">contact@enthalpy.site</div>
-              <div className="loc">Tangier, Morocco</div>
-              <div style={{ marginTop: 14 }}>
-                <button className="btn btn-primary" onClick={() => setPopupOpen(true)}>
-                  Request pilot access
-                </button>
+            <div className="stepCard">
+              <div className="bar" style={{ background: "#22c55e" }} />
+              <div>
+                <p className="stepTitle">✅ Compliance / Payment</p>
+                <p className="stepText">
+                  Audit, penalty or automated payout is triggered.
+                </p>
               </div>
-            </footer>
+            </div>
+          </div>
+
+          {/* Industries */}
+          <div className="industryTitle">
+            Industries where a few degrees cost millions
+          </div>
+
+          <div className="grid3">
+            <div className="industryCard">
+              <h3>Pharma &amp; Biotech</h3>
+              <p>Audit-ready traceability.</p>
+            </div>
+            <div className="industryCard">
+              <h3>Food &amp; Frozen</h3>
+              <p>Prevent cold-chain failures.</p>
+            </div>
+            <div className="industryCard">
+              <h3>Logistics &amp; 3PL</h3>
+              <p>Proof of compliance.</p>
+            </div>
+          </div>
+
+          {/* Footer */}
+          <div className="footer">
+            <div className="email">contact@enthalpy.site</div>
+            <div className="loc">Tangier, Morocco</div>
+
+            {/* ❌ SUPPRIMÉ : bouton du footer */}
           </div>
         </div>
       </section>
 
-      {/* POPUP */}
-      <div
-        className={`popup-overlay ${popupOpen ? "active" : ""}`}
-        onClick={() => setPopupOpen(false)}
-        role="dialog"
-        aria-modal="true"
-      >
-        <div className="popup" onClick={(e) => e.stopPropagation()}>
-          <button className="popup-close" onClick={() => setPopupOpen(false)} aria-label="Close">
+      {/* Popup */}
+      <div className={`popup-overlay ${popupOpen ? "active" : ""}`}>
+        <div className="popup">
+          <button className="popup-close" onClick={closePopup} aria-label="Close">
             ×
           </button>
-          <iframe title="Pilot access form" src={FORM_URL} />
+          <iframe title="Pilot access form" src={iframeSrc} />
         </div>
       </div>
     </>
