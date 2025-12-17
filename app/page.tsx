@@ -5,16 +5,24 @@ import Chart from "chart.js/auto"
 
 type Metric = "temp" | "hum" | "vib" | "co2"
 
-const FORM_URL =
-  "https://docs.google.com/forms/d/e/1FAIpQLSeKqc44-iXAAwxkk2NEWLodNMkshh4u31NP1bWBRvmAcu1GIA/viewform?embedded=true"
-
 export default function Page() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
   const chartRef = useRef<Chart | null>(null)
 
   const [metric, setMetric] = useState<Metric>("temp")
+
+  // ✅ Popup + form state (pro, sans Google Forms)
   const [popupOpen, setPopupOpen] = useState(false)
-  const [iframeSrc, setIframeSrc] = useState("")
+  const [submitting, setSubmitting] = useState(false)
+  const [submitted, setSubmitted] = useState(false)
+  const [form, setForm] = useState({
+    name: "",
+    company: "",
+    email: "",
+    message: "",
+    website: "", // honeypot anti-spam
+  })
+  const [errorMsg, setErrorMsg] = useState<string>("")
 
   const metricConfig = useMemo(() => {
     const cfg: Record<
@@ -66,12 +74,71 @@ export default function Page() {
 
   function openPopup() {
     setPopupOpen(true)
-    setIframeSrc("")
-    setTimeout(() => setIframeSrc(FORM_URL), 40)
+    setSubmitted(false)
+    setErrorMsg("")
+    setForm({ name: "", company: "", email: "", message: "", website: "" })
   }
   function closePopup() {
     setPopupOpen(false)
+    setErrorMsg("")
   }
+
+  function onChange(
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) {
+    const { name, value } = e.target
+    setForm((p) => ({ ...p, [name]: value }))
+  }
+
+  async function submitForm(e: React.FormEvent) {
+    e.preventDefault()
+    setErrorMsg("")
+
+    // honeypot (si rempli => bot)
+    if (form.website.trim().length > 0) return
+
+    // validations simples
+    if (!form.company.trim()) return setErrorMsg("Company name is required.")
+    if (!form.email.trim()) return setErrorMsg("Work email is required.")
+    if (!/^\S+@\S+\.\S+$/.test(form.email.trim()))
+      return setErrorMsg("Please enter a valid email.")
+    if (!form.message.trim()) return setErrorMsg("Message is required.")
+
+    setSubmitting(true)
+    try {
+      const res = await fetch("/api/pilot-access", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: form.name.trim(),
+          company: form.company.trim(),
+          email: form.email.trim(),
+          message: form.message.trim(),
+        }),
+      })
+
+      const data = await res.json().catch(() => ({}))
+      if (!res.ok) {
+        setErrorMsg(data?.error || "Something went wrong. Try again.")
+        return
+      }
+
+      setSubmitted(true)
+    } catch {
+      setErrorMsg("Network error. Please try again.")
+    } finally {
+      setSubmitting(false)
+    }
+  }
+
+  // ESC close
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) {
+      if (e.key === "Escape") setPopupOpen(false)
+    }
+    if (popupOpen) window.addEventListener("keydown", onKey)
+    return () => window.removeEventListener("keydown", onKey)
+  }, [popupOpen])
 
   // Create chart once
   useEffect(() => {
@@ -205,6 +272,11 @@ export default function Page() {
           background: linear-gradient(135deg, #1b73ff, #00c8ff);
           color: #fff;
           box-shadow: 0 14px 30px rgba(27, 115, 255, 0.35);
+        }
+        .btn-ghost {
+          background: rgba(0, 0, 0, 0.04);
+          color: #0b1c33;
+          border: 1px solid rgba(0, 0, 0, 0.08);
         }
 
         .hero {
@@ -438,6 +510,7 @@ export default function Page() {
           font-weight: 800;
         }
 
+        /* ✅ PRO POPUP FORM */
         .popup-overlay {
           display: none;
           position: fixed;
@@ -453,19 +526,94 @@ export default function Page() {
         }
         .popup {
           background: #fff;
-          width: 820px;
+          width: 720px;
           max-width: 100%;
-          height: 86vh;
           border-radius: 18px;
           overflow: hidden;
           position: relative;
           box-shadow: 0 30px 90px rgba(0, 0, 0, 0.25);
+          border: 1px solid rgba(0, 0, 0, 0.06);
         }
-        .popup iframe {
+        .popupHead {
+          padding: 18px 18px 10px;
+          border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+          background: linear-gradient(
+            180deg,
+            rgba(27, 115, 255, 0.06),
+            rgba(255, 255, 255, 1)
+          );
+        }
+        .popupTitle {
+          margin: 0;
+          font-weight: 950;
+          letter-spacing: -0.02em;
+          font-size: 18px;
+        }
+        .popupSub {
+          margin: 6px 0 0;
+          color: #2b3d5a;
+          font-weight: 650;
+          font-size: 12px;
+          line-height: 1.4;
+        }
+        .popupBody {
+          padding: 16px 18px 18px;
+        }
+        .row {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 12px;
+        }
+        label {
+          display: block;
+          font-size: 12px;
+          font-weight: 800;
+          color: #0b1c33;
+          margin: 0 0 6px;
+        }
+        input,
+        textarea {
           width: 100%;
-          height: 100%;
-          border: none;
+          border-radius: 12px;
+          border: 1px solid rgba(0, 0, 0, 0.12);
+          padding: 12px 12px;
+          font-size: 13px;
+          font-weight: 650;
+          outline: none;
+          background: #fff;
         }
+        input:focus,
+        textarea:focus {
+          border-color: rgba(27, 115, 255, 0.55);
+          box-shadow: 0 0 0 4px rgba(27, 115, 255, 0.12);
+        }
+        textarea {
+          min-height: 110px;
+          resize: vertical;
+        }
+        .actions {
+          display: flex;
+          gap: 10px;
+          justify-content: flex-end;
+          margin-top: 12px;
+        }
+        .err {
+          margin-top: 10px;
+          color: #b91c1c;
+          font-weight: 800;
+          font-size: 12px;
+        }
+        .okBox {
+          padding: 14px;
+          border-radius: 14px;
+          background: rgba(34, 197, 94, 0.1);
+          border: 1px solid rgba(34, 197, 94, 0.2);
+          color: #0b1c33;
+          font-weight: 800;
+          font-size: 13px;
+          line-height: 1.4;
+        }
+
         .popup-close {
           position: absolute;
           top: 10px;
@@ -480,11 +628,24 @@ export default function Page() {
           box-shadow: 0 10px 24px rgba(0, 0, 0, 0.2);
         }
 
+        /* hide honeypot */
+        .hp {
+          position: absolute;
+          left: -10000px;
+          top: auto;
+          width: 1px;
+          height: 1px;
+          overflow: hidden;
+        }
+
         @media (max-width: 980px) {
           .hero-grid {
             grid-template-columns: 1fr;
           }
           .grid3 {
+            grid-template-columns: 1fr;
+          }
+          .row {
             grid-template-columns: 1fr;
           }
         }
@@ -502,7 +663,6 @@ export default function Page() {
               </div>
             </div>
 
-            {/* ✅ GARDÉ : le SEUL bouton */}
             <button className="btn btn-primary" onClick={openPopup}>
               Request pilot access
             </button>
@@ -534,8 +694,6 @@ export default function Page() {
               </div>
 
               <div className="hero-tagline">From sensors → proof → payment.</div>
-
-              {/* ❌ SUPPRIMÉ : bouton du hero */}
             </div>
 
             {/* Dashboard */}
@@ -583,17 +741,11 @@ export default function Page() {
 
               <div className="chips">
                 <span className="chip">
-                  <span
-                    className="cDot"
-                    style={{ background: "var(--warn)" }}
-                  />
+                  <span className="cDot" style={{ background: "var(--warn)" }} />
                   Incident captured
                 </span>
                 <span className="chip">
-                  <span
-                    className="cDot"
-                    style={{ background: "var(--warn)" }}
-                  />
+                  <span className="cDot" style={{ background: "var(--warn)" }} />
                   Blockchain-sealed
                 </span>
                 <span className="chip">
@@ -667,19 +819,122 @@ export default function Page() {
           <div className="footer">
             <div className="email">contact@enthalpy.site</div>
             <div className="loc">Tangier, Morocco</div>
-
-            {/* ❌ SUPPRIMÉ : bouton du footer */}
           </div>
         </div>
       </section>
 
-      {/* Popup */}
-      <div className={`popup-overlay ${popupOpen ? "active" : ""}`}>
-        <div className="popup">
+      {/* ✅ Popup (FORM PRO) */}
+      <div
+        className={`popup-overlay ${popupOpen ? "active" : ""}`}
+        onMouseDown={(e) => {
+          // click outside to close
+          if (e.target === e.currentTarget) closePopup()
+        }}
+      >
+        <div className="popup" onMouseDown={(e) => e.stopPropagation()}>
           <button className="popup-close" onClick={closePopup} aria-label="Close">
             ×
           </button>
-          <iframe title="Pilot access form" src={iframeSrc} />
+
+          <div className="popupHead">
+            <h3 className="popupTitle">Request pilot access</h3>
+            <p className="popupSub">
+              Tell us about your company and use case. We’ll reply quickly.
+            </p>
+          </div>
+
+          <div className="popupBody">
+            {submitted ? (
+              <div className="okBox">
+                ✅ Request sent. You’ll receive a short confirmation email.
+                <br />
+                If you don’t see it: check Spam, or email{" "}
+                <b>contact@enthalpy.site</b>.
+              </div>
+            ) : (
+              <form onSubmit={submitForm}>
+                {/* Honeypot */}
+                <div className="hp">
+                  <label>
+                    Website
+                    <input
+                      name="website"
+                      value={form.website}
+                      onChange={onChange}
+                      autoComplete="off"
+                    />
+                  </label>
+                </div>
+
+                <div className="row">
+                  <div>
+                    <label>Name (optional)</label>
+                    <input
+                      name="name"
+                      placeholder="Your name"
+                      value={form.name}
+                      onChange={onChange}
+                      autoComplete="name"
+                    />
+                  </div>
+                  <div>
+                    <label>Company Name *</label>
+                    <input
+                      name="company"
+                      placeholder="Company"
+                      value={form.company}
+                      onChange={onChange}
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div style={{ marginTop: 12 }}>
+                  <label>Work Email *</label>
+                  <input
+                    name="email"
+                    placeholder="name@company.com"
+                    value={form.email}
+                    onChange={onChange}
+                    required
+                    inputMode="email"
+                    autoComplete="email"
+                  />
+                </div>
+
+                <div style={{ marginTop: 12 }}>
+                  <label>Message *</label>
+                  <textarea
+                    name="message"
+                    placeholder="What do you monitor? (assets, route, temperature limits, alerts needed...)"
+                    value={form.message}
+                    onChange={onChange}
+                    required
+                  />
+                </div>
+
+                {errorMsg ? <div className="err">{errorMsg}</div> : null}
+
+                <div className="actions">
+                  <button
+                    type="button"
+                    className="btn btn-ghost"
+                    onClick={closePopup}
+                    disabled={submitting}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="btn btn-primary"
+                    disabled={submitting}
+                  >
+                    {submitting ? "Sending..." : "Submit request"}
+                  </button>
+                </div>
+              </form>
+            )}
+          </div>
         </div>
       </div>
     </>
