@@ -26,31 +26,23 @@ export default function Page() {
 
   const metricConfig = useMemo(() => ({
     temp: {
-      label: "Temp",
+      label: "Temperature",
       data: [4.2, 4.3, 5.9, 6.2, 5.3, 4.7],
-      status: "Temperature excursion detected",
-      cls: "warn",
       line: "#f59e0b",
     },
     hum: {
       label: "Humidity",
       data: [45, 46, 44, 43, 42, 41],
-      status: "Humidity stable",
-      cls: "ok",
       line: "#1b73ff",
     },
     vib: {
       label: "Vibration",
       data: [1, 2, 8, 6, 2, 1],
-      status: "Critical shock detected",
-      cls: "risk",
       line: "#ef4444",
     },
     co2: {
       label: "CO₂",
       data: [400, 420, 480, 650, 720, 680],
-      status: "CO₂ level rising",
-      cls: "warn",
       line: "#1b73ff",
     },
   }), [])
@@ -140,8 +132,53 @@ export default function Page() {
 
   return (
     <>
+      <style jsx global>{`
+        body {
+          margin: 0;
+          font-family: Inter, system-ui, sans-serif;
+          font-weight: 400;
+          color: #0b1c33;
+          background: #f5f7fb;
+        }
+
+        h1 {
+          font-weight: 500;
+          letter-spacing: -0.02em;
+        }
+
+        h1 span {
+          color: #1b73ff;
+        }
+
+        label {
+          font-size: 12px;
+          font-weight: 500;
+          color: #4a5d7a;
+        }
+
+        input, textarea {
+          width: 100%;
+          padding: 10px 12px;
+          margin-top: 6px;
+          margin-bottom: 12px;
+          border-radius: 8px;
+          border: 1px solid rgba(0,0,0,.15);
+          font-weight: 400;
+        }
+
+        button {
+          padding: 10px 18px;
+          border-radius: 999px;
+          border: none;
+          background: #1b73ff;
+          color: #fff;
+          cursor: pointer;
+          font-weight: 500;
+        }
+      `}</style>
+
       <header style={{ padding: 20, display: "flex", justifyContent: "space-between" }}>
-        <strong>Enthalpy</strong>
+        <strong style={{ fontWeight: 500 }}>Enthalpy</strong>
         <button onClick={openPopup}>Request pilot access</button>
       </header>
 
@@ -151,7 +188,7 @@ export default function Page() {
           <span>Evidence you can prove.</span>
         </h1>
 
-        <div style={{ height: 200 }}>
+        <div style={{ height: 220, marginTop: 20 }}>
           <canvas ref={canvasRef} />
         </div>
       </main>
@@ -162,7 +199,7 @@ export default function Page() {
           style={{
             position: "fixed",
             inset: 0,
-            background: "rgba(0,0,0,.6)",
+            background: "rgba(0,0,0,.55)",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
@@ -174,12 +211,12 @@ export default function Page() {
             style={{
               background: "#fff",
               padding: 24,
-              width: 500,
+              width: 420,
               borderRadius: 12,
             }}
             onClick={(e) => e.stopPropagation()}
           >
-            <h3>Request pilot access</h3>
+            <h3 style={{ fontWeight: 500 }}>Request pilot access</h3>
 
             {submitted ? (
               <p>✅ Request sent. We’ll contact you.</p>
@@ -187,12 +224,19 @@ export default function Page() {
               <form onSubmit={submitForm}>
                 <input name="website" value={form.website} onChange={onChange} style={{ display: "none" }} />
 
-                <input name="name" placeholder="Name" value={form.name} onChange={onChange} />
-                <input name="company" placeholder="Company *" value={form.company} onChange={onChange} />
-                <input name="email" placeholder="Email *" value={form.email} onChange={onChange} />
-                <textarea name="message" placeholder="Message *" value={form.message} onChange={onChange} />
+                <label>Name (optional)</label>
+                <input name="name" value={form.name} onChange={onChange} />
 
-                {errorMsg && <p style={{ color: "red" }}>{errorMsg}</p>}
+                <label>Company *</label>
+                <input name="company" value={form.company} onChange={onChange} />
+
+                <label>Email *</label>
+                <input name="email" value={form.email} onChange={onChange} />
+
+                <label>Message *</label>
+                <textarea name="message" value={form.message} onChange={onChange} />
+
+                {errorMsg && <p style={{ color: "#b91c1c" }}>{errorMsg}</p>}
 
                 <button type="submit" disabled={submitting}>
                   {submitting ? "Sending..." : "Submit"}
