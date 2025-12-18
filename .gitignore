@@ -45,3 +45,6 @@ next-env.d.ts
 node_modules
 bot/
 git/
+.env.local
+.env
+.vercel

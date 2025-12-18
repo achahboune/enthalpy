@@ -1,7 +1,6 @@
 "use client"
 
-import { useEffect, useMemo, useRef, useState } from "react"
-import type { ChangeEvent, FormEvent } from "react"
+import React, { useEffect, useMemo, useRef, useState } from "react"
 import Chart from "chart.js/auto"
 
 type Metric = "temp" | "hum" | "vib" | "co2"
@@ -12,7 +11,7 @@ export default function Page() {
 
   const [metric, setMetric] = useState<Metric>("temp")
 
-  // Popup + form
+  // POPUP + FORM
   const [popupOpen, setPopupOpen] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const [submitted, setSubmitted] = useState(false)
@@ -79,26 +78,26 @@ export default function Page() {
     setErrorMsg("")
     setForm({ name: "", company: "", email: "", message: "", website: "" })
   }
+
   function closePopup() {
     setPopupOpen(false)
     setErrorMsg("")
   }
 
-  function onChange(e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) {
+  function onChange(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) {
     const { name, value } = e.target
     setForm((p) => ({ ...p, [name]: value }))
   }
 
-  async function submitForm(e: FormEvent) {
+  async function submitForm(e: React.FormEvent) {
     e.preventDefault()
     setErrorMsg("")
 
-    if (form.website.trim().length > 0) return
+    if (form.website.trim().length > 0) return // honeypot
 
     if (!form.company.trim()) return setErrorMsg("Company name is required.")
     if (!form.email.trim()) return setErrorMsg("Work email is required.")
-    if (!/^\S+@\S+\.\S+$/.test(form.email.trim()))
-      return setErrorMsg("Please enter a valid email.")
+    if (!/^\S+@\S+\.\S+$/.test(form.email.trim())) return setErrorMsg("Please enter a valid email.")
     if (!form.message.trim()) return setErrorMsg("Message is required.")
 
     setSubmitting(true)
@@ -138,7 +137,7 @@ export default function Page() {
     return () => window.removeEventListener("keydown", onKey)
   }, [popupOpen])
 
-  // Chart create
+  // Create chart once
   useEffect(() => {
     if (!canvasRef.current) return
     const ctx = canvasRef.current.getContext("2d")
@@ -175,7 +174,7 @@ export default function Page() {
     }
   }, [metricConfig])
 
-  // Chart update
+  // Update chart on metric change
   useEffect(() => {
     const c = chartRef.current
     if (!c) return
@@ -198,14 +197,17 @@ export default function Page() {
           --ok: #22c55e;
           --warn: #f59e0b;
           --risk: #ef4444;
+          --label: #51627f; /* ✅ froid */
         }
+
         * {
           box-sizing: border-box;
         }
+
         body {
           margin: 0;
           font-family: Inter, system-ui, sans-serif;
-          font-weight: 450; /* ✅ plus fin */
+          font-weight: 420; /* ✅ plus fin */
           background: radial-gradient(
               1200px 600px at 70% 0%,
               rgba(27, 115, 255, 0.12),
@@ -214,9 +216,11 @@ export default function Page() {
             var(--bg);
           color: var(--dark);
         }
+
         strong {
-          font-weight: 600; /* ✅ pas “bold” agressif */
+          font-weight: 600; /* ✅ au lieu de très bold */
         }
+
         .container {
           width: 100%;
           max-width: 1240px;
@@ -232,6 +236,7 @@ export default function Page() {
           backdrop-filter: blur(10px);
           border-bottom: 1px solid rgba(0, 0, 0, 0.06);
         }
+
         nav {
           display: flex;
           justify-content: space-between;
@@ -244,23 +249,26 @@ export default function Page() {
           align-items: center;
           gap: 12px;
         }
+
         .logo img {
           height: 52px;
           width: auto;
         }
+
         .logo strong {
           color: var(--dark);
           font-size: 18px;
           line-height: 1;
-          font-weight: 650;
+          font-weight: 650; /* ✅ */
         }
+
         .logo span {
           display: block;
           margin-top: 2px;
           font-size: 11px;
           letter-spacing: 0.18em;
           color: #4a5d7a;
-          font-weight: 600; /* ✅ plus fin */
+          font-weight: 650; /* ✅ */
           white-space: nowrap;
         }
 
@@ -271,11 +279,13 @@ export default function Page() {
           font-weight: 650; /* ✅ */
           cursor: pointer;
         }
+
         .btn-primary {
           background: linear-gradient(135deg, #1b73ff, #00c8ff);
           color: #fff;
-          box-shadow: 0 14px 30px rgba(27, 115, 255, 0.25);
+          box-shadow: 0 14px 30px rgba(27, 115, 255, 0.35);
         }
+
         .btn-ghost {
           background: rgba(0, 0, 0, 0.04);
           color: #0b1c33;
@@ -285,6 +295,7 @@ export default function Page() {
         .hero {
           padding: 46px 0 26px;
         }
+
         .hero-grid {
           display: grid;
           grid-template-columns: 1.1fr 0.9fr;
@@ -297,8 +308,9 @@ export default function Page() {
           margin: 0;
           letter-spacing: -0.02em;
           line-height: 1.02;
-          font-weight: 700; /* ✅ */
+          font-weight: 800; /* ✅ titre ok */
         }
+
         h1 span {
           color: var(--blue);
         }
@@ -306,15 +318,16 @@ export default function Page() {
         .hero-copy {
           margin-top: 14px;
           color: #2b3d5a;
-          font-weight: 480; /* ✅ */
+          font-weight: 420; /* ✅ plus fin */
           max-width: 560px;
           line-height: 1.55;
           font-size: 14px;
         }
+
         .hero-tagline {
           margin-top: 12px;
           color: var(--blue);
-          font-weight: 600; /* ✅ */
+          font-weight: 650; /* ✅ */
           font-size: 13px;
         }
 
@@ -331,7 +344,10 @@ export default function Page() {
           justify-content: space-between;
           align-items: center;
           margin-bottom: 10px;
-          font-weight: 600;
+        }
+
+        .dashboard-header strong {
+          font-weight: 650; /* ✅ */
         }
 
         .status {
@@ -342,6 +358,7 @@ export default function Page() {
           color: #2b3d5a;
           font-weight: 520; /* ✅ */
         }
+
         .dot {
           width: 8px;
           height: 8px;
@@ -355,6 +372,7 @@ export default function Page() {
           gap: 8px;
           margin: 10px 0 8px;
         }
+
         .tab {
           flex: 1;
           border: 1px solid rgba(0, 0, 0, 0.08);
@@ -368,6 +386,7 @@ export default function Page() {
           align-items: center;
           justify-content: center;
         }
+
         .tab.active {
           border-color: transparent;
         }
@@ -379,9 +398,10 @@ export default function Page() {
 
         .alertline {
           margin-top: 10px;
-          font-weight: 600; /* ✅ */
+          font-weight: 520; /* ✅ */
           font-size: 12px;
         }
+
         .alertline.ok {
           color: var(--ok);
         }
@@ -398,6 +418,7 @@ export default function Page() {
           flex-wrap: wrap;
           margin-top: 6px;
         }
+
         .chip {
           display: inline-flex;
           align-items: center;
@@ -405,11 +426,12 @@ export default function Page() {
           border-radius: 999px;
           padding: 6px 10px;
           font-size: 11px;
-          font-weight: 600; /* ✅ */
+          font-weight: 520; /* ✅ */
           background: rgba(0, 0, 0, 0.04);
           border: 1px solid rgba(0, 0, 0, 0.06);
           color: #0b1c33;
         }
+
         .chip .cDot {
           width: 8px;
           height: 8px;
@@ -418,17 +440,18 @@ export default function Page() {
 
         .centerTitle {
           text-align: center;
-          font-weight: 700; /* ✅ */
+          font-weight: 650; /* ✅ */
           font-size: 18px;
           margin: 24px 0 6px;
           letter-spacing: -0.01em;
         }
+
         .centerSub {
           text-align: center;
           margin: 0 auto 22px;
           max-width: 720px;
           color: var(--muted);
-          font-weight: 480; /* ✅ */
+          font-weight: 420; /* ✅ */
           font-size: 13px;
         }
 
@@ -437,6 +460,7 @@ export default function Page() {
           grid-template-columns: repeat(3, 1fr);
           gap: 18px;
         }
+
         .stepCard {
           background: #fff;
           border-radius: 14px;
@@ -449,31 +473,35 @@ export default function Page() {
           gap: 12px;
           align-items: start;
         }
+
         .bar {
           width: 4px;
           border-radius: 999px;
           height: 100%;
         }
+
         .stepTitle {
           font-weight: 650; /* ✅ */
           margin: 0 0 4px;
           font-size: 13px;
         }
+
         .stepText {
           margin: 0;
           color: #2b3d5a;
-          font-weight: 480; /* ✅ */
+          font-weight: 420; /* ✅ */
           font-size: 12px;
           line-height: 1.4;
         }
 
         .industryTitle {
           text-align: center;
-          font-weight: 700; /* ✅ */
+          font-weight: 650; /* ✅ */
           font-size: 20px;
           margin: 26px 0 14px;
           letter-spacing: -0.01em;
         }
+
         .industryCard {
           background: #fff;
           border-radius: 14px;
@@ -481,16 +509,18 @@ export default function Page() {
           box-shadow: 0 14px 40px rgba(6, 19, 37, 0.08);
           border: 1px solid rgba(0, 0, 0, 0.05);
         }
+
         .industryCard h3 {
           margin: 0 0 6px;
           color: var(--blue);
           font-weight: 650; /* ✅ */
           font-size: 14px;
         }
+
         .industryCard p {
           margin: 0;
           color: #2b3d5a;
-          font-weight: 480; /* ✅ */
+          font-weight: 420; /* ✅ */
           font-size: 12px;
         }
 
@@ -498,21 +528,23 @@ export default function Page() {
           text-align: center;
           padding: 26px 0 34px;
           color: #2b3d5a;
-          font-weight: 480; /* ✅ */
+          font-weight: 420; /* ✅ */
           font-size: 12px;
         }
+
         .footer .email {
           font-weight: 650; /* ✅ */
           color: #0b1c33;
           font-size: 13px;
         }
+
         .footer .loc {
           margin-top: 6px;
           color: #6c7a92;
           font-weight: 520; /* ✅ */
         }
 
-        /* Popup form */
+        /* POPUP */
         .popup-overlay {
           display: none;
           position: fixed;
@@ -523,9 +555,11 @@ export default function Page() {
           justify-content: center;
           padding: 18px;
         }
+
         .popup-overlay.active {
           display: flex;
         }
+
         .popup {
           background: #fff;
           width: 720px;
@@ -536,6 +570,7 @@ export default function Page() {
           box-shadow: 0 30px 90px rgba(0, 0, 0, 0.25);
           border: 1px solid rgba(0, 0, 0, 0.06);
         }
+
         .popupHead {
           padding: 18px 18px 10px;
           border-bottom: 1px solid rgba(0, 0, 0, 0.06);
@@ -545,34 +580,41 @@ export default function Page() {
             rgba(255, 255, 255, 1)
           );
         }
+
         .popupTitle {
           margin: 0;
-          font-weight: 700; /* ✅ */
+          font-weight: 650; /* ✅ */
           letter-spacing: -0.02em;
           font-size: 18px;
         }
+
         .popupSub {
           margin: 6px 0 0;
           color: #2b3d5a;
-          font-weight: 480; /* ✅ */
+          font-weight: 420; /* ✅ */
           font-size: 12px;
           line-height: 1.4;
         }
+
         .popupBody {
           padding: 16px 18px 18px;
         }
+
         .row {
           display: grid;
           grid-template-columns: 1fr 1fr;
           gap: 12px;
         }
+
+        /* ✅ Labels couleur + plus fins */
         label {
           display: block;
           font-size: 12px;
-          font-weight: 550; /* ✅ plus fin */
-          color: #4a5d7a; /* ✅ couleur étiquettes */
+          font-weight: 520; /* ✅ */
+          color: var(--label); /* ✅ */
           margin: 0 0 6px;
         }
+
         input,
         textarea {
           width: 100%;
@@ -580,38 +622,44 @@ export default function Page() {
           border: 1px solid rgba(0, 0, 0, 0.12);
           padding: 12px 12px;
           font-size: 13px;
-          font-weight: 450; /* ✅ */
+          font-weight: 420; /* ✅ */
           outline: none;
           background: #fff;
+          color: #0b1c33;
         }
+
         input:focus,
         textarea:focus {
           border-color: rgba(27, 115, 255, 0.55);
           box-shadow: 0 0 0 4px rgba(27, 115, 255, 0.12);
         }
+
         textarea {
           min-height: 110px;
           resize: vertical;
         }
+
         .actions {
           display: flex;
           gap: 10px;
           justify-content: flex-end;
           margin-top: 12px;
         }
+
         .err {
           margin-top: 10px;
           color: #b91c1c;
-          font-weight: 600;
+          font-weight: 520; /* ✅ */
           font-size: 12px;
         }
+
         .okBox {
           padding: 14px;
           border-radius: 14px;
           background: rgba(34, 197, 94, 0.1);
           border: 1px solid rgba(34, 197, 94, 0.2);
           color: #0b1c33;
-          font-weight: 520;
+          font-weight: 420; /* ✅ */
           font-size: 13px;
           line-height: 1.4;
         }
@@ -652,6 +700,7 @@ export default function Page() {
         }
       `}</style>
 
+      {/* HEADER */}
       <header>
         <div className="container">
           <nav>
@@ -670,6 +719,7 @@ export default function Page() {
         </div>
       </header>
 
+      {/* HERO */}
       <section className="hero">
         <div className="container">
           <div className="hero-grid">
@@ -695,6 +745,7 @@ export default function Page() {
               <div className="hero-tagline">From sensors → proof → payment.</div>
             </div>
 
+            {/* Dashboard */}
             <div className="dashboard">
               <div className="dashboard-header">
                 <strong>Live monitoring</strong>
@@ -715,11 +766,7 @@ export default function Page() {
                       onClick={() => setMetric(m)}
                       style={
                         active
-                          ? {
-                              background: tab.bg,
-                              color: tab.fg,
-                              borderColor: tab.border,
-                            }
+                          ? { background: tab.bg, color: tab.fg, borderColor: tab.border }
                           : undefined
                       }
                     >
@@ -733,7 +780,7 @@ export default function Page() {
                 <canvas ref={canvasRef} />
               </div>
 
-              <div className={`alertline ${alertCls}`}>
+              <div className={`alertline ${metricConfig[metric].cls}`}>
                 {metricConfig[metric].status}
               </div>
 
@@ -756,8 +803,8 @@ export default function Page() {
 
           <div className="centerTitle">From sensors to proof</div>
           <div className="centerSub">
-            Enthalpy turns real-world incidents into trusted digital evidence that
-            can trigger compliance actions or payments.
+            Enthalpy turns real-world incidents into trusted digital evidence that can trigger
+            compliance actions or payments.
           </div>
 
           <div className="grid3">
@@ -765,9 +812,7 @@ export default function Page() {
               <div className="bar" style={{ background: "#1b73ff" }} />
               <div>
                 <p className="stepTitle">🔔 Sensor event</p>
-                <p className="stepText">
-                  Temperature, vibration or CO₂ threshold exceeded.
-                </p>
+                <p className="stepText">Temperature, vibration or CO₂ threshold exceeded.</p>
               </div>
             </div>
 
@@ -775,9 +820,7 @@ export default function Page() {
               <div className="bar" style={{ background: "#f59e0b" }} />
               <div>
                 <p className="stepTitle">🔒 Blockchain proof</p>
-                <p className="stepText">
-                  Event is hashed, timestamped and sealed on-chain.
-                </p>
+                <p className="stepText">Event is hashed, timestamped and sealed on-chain.</p>
               </div>
             </div>
 
@@ -785,16 +828,12 @@ export default function Page() {
               <div className="bar" style={{ background: "#22c55e" }} />
               <div>
                 <p className="stepTitle">✅ Compliance / Payment</p>
-                <p className="stepText">
-                  Audit, penalty or automated payout is triggered.
-                </p>
+                <p className="stepText">Audit, penalty or automated payout is triggered.</p>
               </div>
             </div>
           </div>
 
-          <div className="industryTitle">
-            Industries where a few degrees cost millions
-          </div>
+          <div className="industryTitle">Industries where a few degrees cost millions</div>
 
           <div className="grid3">
             <div className="industryCard">
@@ -818,6 +857,7 @@ export default function Page() {
         </div>
       </section>
 
+      {/* POPUP */}
       <div
         className={`popup-overlay ${popupOpen ? "active" : ""}`}
         onMouseDown={(e) => {
@@ -831,9 +871,7 @@ export default function Page() {
 
           <div className="popupHead">
             <h3 className="popupTitle">Request pilot access</h3>
-            <p className="popupSub">
-              Tell us about your company and use case. We’ll reply quickly.
-            </p>
+            <p className="popupSub">Tell us about your company and use case. We’ll reply quickly.</p>
           </div>
 
           <div className="popupBody">
@@ -841,11 +879,11 @@ export default function Page() {
               <div className="okBox">
                 ✅ Request sent. You’ll receive a short confirmation email.
                 <br />
-                If you don’t see it: check Spam, or email{" "}
-                <b>contact@enthalpy.site</b>.
+                If you don’t see it: check Spam, or email <b>contact@enthalpy.site</b>.
               </div>
             ) : (
               <form onSubmit={submitForm}>
+                {/* Honeypot */}
                 <div className="hp">
                   <label>
                     Website
@@ -916,11 +954,7 @@ export default function Page() {
                   >
                     Cancel
                   </button>
-                  <button
-                    type="submit"
-                    className="btn btn-primary"
-                    disabled={submitting}
-                  >
+                  <button type="submit" className="btn btn-primary" disabled={submitting}>
                     {submitting ? "Sending..." : "Submit request"}
                   </button>
                 </div>
