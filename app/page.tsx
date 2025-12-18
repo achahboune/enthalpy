@@ -11,7 +11,6 @@ export default function Page() {
 
   const [metric, setMetric] = useState<Metric>("temp")
 
-  // POPUP + FORM
   const [popupOpen, setPopupOpen] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const [submitted, setSubmitted] = useState(false)
@@ -72,8 +71,6 @@ export default function Page() {
     return cfg
   }, [])
 
-  const API_URL = "/api/pilot-access/" // ✅ évite le 308 redirect si trailingSlash
-
   function openPopup() {
     setPopupOpen(true)
     setSubmitted(false)
@@ -96,15 +93,15 @@ export default function Page() {
     setErrorMsg("")
 
     if (form.website.trim().length > 0) return // honeypot
-
     if (!form.company.trim()) return setErrorMsg("Company name is required.")
     if (!form.email.trim()) return setErrorMsg("Work email is required.")
-    if (!/^\S+@\S+\.\S+$/.test(form.email.trim())) return setErrorMsg("Please enter a valid email.")
+    if (!/^\S+@\S+\.\S+$/.test(form.email.trim()))
+      return setErrorMsg("Please enter a valid email.")
     if (!form.message.trim()) return setErrorMsg("Message is required.")
 
     setSubmitting(true)
     try {
-      const res = await fetch(API_URL, {
+      const res = await fetch("/api/pilot-access", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -130,7 +127,6 @@ export default function Page() {
     }
   }
 
-  // ESC close
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
       if (e.key === "Escape") setPopupOpen(false)
@@ -139,7 +135,6 @@ export default function Page() {
     return () => window.removeEventListener("keydown", onKey)
   }, [popupOpen])
 
-  // Create chart once
   useEffect(() => {
     if (!canvasRef.current) return
     const ctx = canvasRef.current.getContext("2d")
@@ -176,7 +171,6 @@ export default function Page() {
     }
   }, [metricConfig])
 
-  // Update chart on metric change
   useEffect(() => {
     const c = chartRef.current
     if (!c) return
@@ -199,527 +193,131 @@ export default function Page() {
           --risk: #ef4444;
           --label: #51627f;
         }
-
-        * {
-          box-sizing: border-box;
-        }
-
+        * { box-sizing: border-box; }
         body {
           margin: 0;
           font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
-          font-weight: 400;
+          font-weight: 380;
           -webkit-font-smoothing: antialiased;
           -moz-osx-font-smoothing: grayscale;
-          background: radial-gradient(
-              1200px 600px at 70% 0%,
-              rgba(27, 115, 255, 0.12),
-              transparent 60%
-            ),
-            var(--bg);
+          background: radial-gradient(1200px 600px at 70% 0%, rgba(27,115,255,.12), transparent 60%), var(--bg);
           color: var(--dark);
         }
+        strong, b { font-weight: 480; }
 
-        strong,
-        b {
-          font-weight: 500; /* ✅ pas “gras lourd” */
-        }
-
-        .container {
-          width: 100%;
-          max-width: 1240px;
-          margin: 0 auto;
-          padding: 0 24px;
-        }
-
+        .container { width: 100%; max-width: 1240px; margin: 0 auto; padding: 0 24px; }
         header {
-          position: sticky;
-          top: 0;
-          z-index: 20;
-          background: rgba(245, 247, 251, 0.92);
+          position: sticky; top: 0; z-index: 20;
+          background: rgba(245,247,251,.92);
           backdrop-filter: blur(10px);
-          border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+          border-bottom: 1px solid rgba(0,0,0,.06);
         }
+        nav { display:flex; justify-content:space-between; align-items:center; padding: 14px 0; }
+        .logo { display:flex; align-items:center; gap:12px; }
+        .logo img { height: 52px; width:auto; }
+        .logo strong { font-size: 18px; line-height: 1; font-weight: 520; }
+        .logo span { display:block; margin-top:2px; font-size:11px; letter-spacing:.18em; color:#4a5d7a; font-weight:480; white-space:nowrap; }
 
-        nav {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          padding: 14px 0;
-        }
+        .btn { padding: 12px 22px; border-radius: 999px; border:none; font-weight:520; cursor:pointer; }
+        .btn-primary { background: linear-gradient(135deg,#1b73ff,#00c8ff); color:#fff; box-shadow: 0 14px 30px rgba(27,115,255,.28); }
+        .btn-ghost { background: rgba(0,0,0,.04); color:#0b1c33; border:1px solid rgba(0,0,0,.08); }
 
-        .logo {
-          display: flex;
-          align-items: center;
-          gap: 12px;
-        }
+        .hero { padding: 46px 0 26px; }
+        .hero-grid { display:grid; grid-template-columns:1.1fr .9fr; gap: 40px; align-items:start; }
+        h1 { font-size: clamp(38px,4.4vw,66px); margin:0; letter-spacing:-.02em; line-height:1.02; font-weight: 560; }
+        h1 span { color: var(--blue); }
+        .hero-copy { margin-top: 14px; color:#2b3d5a; font-weight:380; max-width:560px; line-height:1.55; font-size:14px; }
+        .hero-tagline { margin-top:12px; color: var(--blue); font-weight: 480; font-size:13px; }
 
-        .logo img {
-          height: 52px;
-          width: auto;
-        }
+        .dashboard { background: var(--card); border-radius: 18px; padding:16px; box-shadow: 0 22px 60px rgba(6,19,37,.12); border:1px solid rgba(0,0,0,.05); }
+        .dashboard-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; }
+        .dashboard-header strong { font-weight: 520; }
+        .status { display:flex; align-items:center; gap:8px; font-size:12px; color:#2b3d5a; font-weight: 420; }
+        .dot { width:8px; height:8px; border-radius:50%; background: var(--ok); box-shadow: 0 0 0 5px rgba(34,197,94,.18); }
 
-        .logo strong {
-          color: var(--dark);
-          font-size: 18px;
-          line-height: 1;
-          font-weight: 520;
-        }
+        .tabs { display:flex; gap:8px; margin:10px 0 8px; }
+        .tab { flex:1; border:1px solid rgba(0,0,0,.08); padding:8px 10px; border-radius:999px; font-size:12px; background:#eef3ff; cursor:pointer; font-weight:480; display:flex; align-items:center; justify-content:center; }
+        .tab.active { border-color: transparent; }
 
-        .logo span {
-          display: block;
-          margin-top: 2px;
-          font-size: 11px;
-          letter-spacing: 0.18em;
-          color: #4a5d7a;
-          font-weight: 450;
-          white-space: nowrap;
-        }
+        .chartWrap { height:150px; margin-top:4px; }
+        .alertline { margin-top:10px; font-weight:420; font-size:12px; }
+        .alertline.ok { color: var(--ok); }
+        .alertline.warn { color: #b45309; }
+        .alertline.risk { color: var(--risk); }
 
-        .btn {
-          padding: 12px 22px;
-          border-radius: 999px;
-          border: none;
-          font-weight: 520;
-          cursor: pointer;
-        }
+        .chips { display:flex; gap:10px; flex-wrap:wrap; margin-top:6px; }
+        .chip { display:inline-flex; align-items:center; gap:6px; border-radius:999px; padding:6px 10px; font-size:11px; font-weight:420; background: rgba(0,0,0,.04); border:1px solid rgba(0,0,0,.06); color:#0b1c33; }
+        .chip .cDot { width:8px; height:8px; border-radius:50%; }
 
-        .btn-primary {
-          background: linear-gradient(135deg, #1b73ff, #00c8ff);
-          color: #fff;
-          box-shadow: 0 14px 30px rgba(27, 115, 255, 0.28);
-        }
+        .centerTitle { text-align:center; font-weight:480; font-size:18px; margin:24px 0 6px; letter-spacing:-.01em; }
+        .centerSub { text-align:center; margin:0 auto 22px; max-width:720px; color: var(--muted); font-weight:380; font-size:13px; }
 
-        .btn-ghost {
-          background: rgba(0, 0, 0, 0.04);
-          color: #0b1c33;
-          border: 1px solid rgba(0, 0, 0, 0.08);
-        }
+        .grid3 { display:grid; grid-template-columns: repeat(3,1fr); gap:18px; }
+        .stepCard { background:#fff; border-radius:14px; padding:18px 18px 16px; box-shadow: 0 14px 40px rgba(6,19,37,.08); border:1px solid rgba(0,0,0,.05); min-height:96px; display:grid; grid-template-columns: 10px 1fr; gap:12px; }
+        .bar { width:4px; border-radius:999px; height:100%; }
+        .stepTitle { font-weight:480; margin:0 0 4px; font-size:13px; }
+        .stepText { margin:0; color:#2b3d5a; font-weight:380; font-size:12px; line-height:1.4; }
 
-        .hero {
-          padding: 46px 0 26px;
-        }
+        .industryTitle { text-align:center; font-weight:480; font-size:20px; margin:26px 0 14px; letter-spacing:-.01em; }
+        .industryCard { background:#fff; border-radius:14px; padding:18px; box-shadow: 0 14px 40px rgba(6,19,37,.08); border:1px solid rgba(0,0,0,.05); }
+        .industryCard h3 { margin:0 0 6px; color: var(--blue); font-weight:480; font-size:14px; }
+        .industryCard p { margin:0; color:#2b3d5a; font-weight:380; font-size:12px; }
 
-        .hero-grid {
-          display: grid;
-          grid-template-columns: 1.1fr 0.9fr;
-          gap: 40px;
-          align-items: start;
-        }
+        .footer { text-align:center; padding:26px 0 34px; color:#2b3d5a; font-weight:380; font-size:12px; }
+        .footer .email { font-weight:480; color:#0b1c33; font-size:13px; }
+        .footer .loc { margin-top:6px; color:#6c7a92; font-weight:420; }
 
-        h1 {
-          font-size: clamp(38px, 4.4vw, 66px);
-          margin: 0;
-          letter-spacing: -0.02em;
-          line-height: 1.02;
-          font-weight: 560; /* ✅ plus fin */
-        }
+        .popup-overlay { display:none; position:fixed; inset:0; background: rgba(0,0,0,.55); z-index:9999; align-items:center; justify-content:center; padding:18px; }
+        .popup-overlay.active { display:flex; }
+        .popup { background:#fff; width:720px; max-width:100%; border-radius:18px; overflow:hidden; position:relative; box-shadow: 0 30px 90px rgba(0,0,0,.25); border:1px solid rgba(0,0,0,.06); }
+        .popupHead { padding:18px 18px 10px; border-bottom:1px solid rgba(0,0,0,.06); background: linear-gradient(180deg, rgba(27,115,255,.06), rgba(255,255,255,1)); }
+        .popupTitle { margin:0; font-weight:480; letter-spacing:-.02em; font-size:18px; }
+        .popupSub { margin:6px 0 0; color:#2b3d5a; font-weight:380; font-size:12px; line-height:1.4; }
+        .popupBody { padding:16px 18px 18px; }
+        .row { display:grid; grid-template-columns: 1fr 1fr; gap:12px; }
 
-        h1 span {
-          color: var(--blue);
-        }
+        label { display:block; font-size:12px; font-weight:420; color: var(--label); margin:0 0 6px; }
+        input, textarea { width:100%; border-radius:12px; border:1px solid rgba(0,0,0,.12); padding:12px; font-size:13px; font-weight:380; outline:none; background:#fff; color:#0b1c33; }
+        input:focus, textarea:focus { border-color: rgba(27,115,255,.55); box-shadow: 0 0 0 4px rgba(27,115,255,.12); }
+        textarea { min-height:110px; resize:vertical; }
+        .actions { display:flex; gap:10px; justify-content:flex-end; margin-top:12px; }
+        .err { margin-top:10px; color:#b91c1c; font-weight:420; font-size:12px; }
 
-        .hero-copy {
-          margin-top: 14px;
-          color: #2b3d5a;
-          font-weight: 400;
-          max-width: 560px;
-          line-height: 1.55;
-          font-size: 14px;
-        }
-
-        .hero-tagline {
-          margin-top: 12px;
-          color: var(--blue);
-          font-weight: 500;
-          font-size: 13px;
-        }
-
-        .dashboard {
-          background: var(--card);
-          border-radius: 18px;
-          padding: 16px;
-          box-shadow: 0 22px 60px rgba(6, 19, 37, 0.12);
-          border: 1px solid rgba(0, 0, 0, 0.05);
-        }
-
-        .dashboard-header {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          margin-bottom: 10px;
-        }
-
-        .dashboard-header strong {
-          font-weight: 520;
-        }
-
-        .status {
-          display: flex;
-          align-items: center;
-          gap: 8px;
-          font-size: 12px;
-          color: #2b3d5a;
-          font-weight: 450;
-        }
-
-        .dot {
-          width: 8px;
-          height: 8px;
-          border-radius: 50%;
-          background: var(--ok);
-          box-shadow: 0 0 0 5px rgba(34, 197, 94, 0.18);
-        }
-
-        .tabs {
-          display: flex;
-          gap: 8px;
-          margin: 10px 0 8px;
-        }
-
-        .tab {
-          flex: 1;
-          border: 1px solid rgba(0, 0, 0, 0.08);
-          padding: 8px 10px;
-          border-radius: 999px;
-          font-size: 12px;
-          background: #eef3ff;
-          cursor: pointer;
-          font-weight: 500;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-        }
-
-        .tab.active {
-          border-color: transparent;
-        }
-
-        .chartWrap {
-          height: 150px;
-          margin-top: 4px;
-        }
-
-        .alertline {
-          margin-top: 10px;
-          font-weight: 450;
-          font-size: 12px;
-        }
-
-        .alertline.ok {
-          color: var(--ok);
-        }
-        .alertline.warn {
-          color: #b45309;
-        }
-        .alertline.risk {
-          color: var(--risk);
-        }
-
-        .chips {
-          display: flex;
-          gap: 10px;
-          flex-wrap: wrap;
-          margin-top: 6px;
-        }
-
-        .chip {
-          display: inline-flex;
-          align-items: center;
-          gap: 6px;
-          border-radius: 999px;
-          padding: 6px 10px;
-          font-size: 11px;
-          font-weight: 450;
-          background: rgba(0, 0, 0, 0.04);
-          border: 1px solid rgba(0, 0, 0, 0.06);
-          color: #0b1c33;
-        }
-
-        .chip .cDot {
-          width: 8px;
-          height: 8px;
-          border-radius: 50%;
-        }
-
-        .centerTitle {
-          text-align: center;
-          font-weight: 520;
-          font-size: 18px;
-          margin: 24px 0 6px;
-          letter-spacing: -0.01em;
-        }
-
-        .centerSub {
-          text-align: center;
-          margin: 0 auto 22px;
-          max-width: 720px;
-          color: var(--muted);
-          font-weight: 400;
-          font-size: 13px;
-        }
-
-        .grid3 {
-          display: grid;
-          grid-template-columns: repeat(3, 1fr);
-          gap: 18px;
-        }
-
-        .stepCard {
-          background: #fff;
-          border-radius: 14px;
-          padding: 18px 18px 16px;
-          box-shadow: 0 14px 40px rgba(6, 19, 37, 0.08);
-          border: 1px solid rgba(0, 0, 0, 0.05);
-          min-height: 96px;
-          display: grid;
-          grid-template-columns: 10px 1fr;
-          gap: 12px;
-          align-items: start;
-        }
-
-        .bar {
-          width: 4px;
-          border-radius: 999px;
-          height: 100%;
-        }
-
-        .stepTitle {
-          font-weight: 520;
-          margin: 0 0 4px;
-          font-size: 13px;
-        }
-
-        .stepText {
-          margin: 0;
-          color: #2b3d5a;
-          font-weight: 400;
-          font-size: 12px;
-          line-height: 1.4;
-        }
-
-        .industryTitle {
-          text-align: center;
-          font-weight: 520;
-          font-size: 20px;
-          margin: 26px 0 14px;
-          letter-spacing: -0.01em;
-        }
-
-        .industryCard {
-          background: #fff;
-          border-radius: 14px;
-          padding: 18px;
-          box-shadow: 0 14px 40px rgba(6, 19, 37, 0.08);
-          border: 1px solid rgba(0, 0, 0, 0.05);
-        }
-
-        .industryCard h3 {
-          margin: 0 0 6px;
-          color: var(--blue);
-          font-weight: 520;
-          font-size: 14px;
-        }
-
-        .industryCard p {
-          margin: 0;
-          color: #2b3d5a;
-          font-weight: 400;
-          font-size: 12px;
-        }
-
-        .footer {
-          text-align: center;
-          padding: 26px 0 34px;
-          color: #2b3d5a;
-          font-weight: 400;
-          font-size: 12px;
-        }
-
-        .footer .email {
-          font-weight: 520;
-          color: #0b1c33;
-          font-size: 13px;
-        }
-
-        .footer .loc {
-          margin-top: 6px;
-          color: #6c7a92;
-          font-weight: 450;
-        }
-
-        /* POPUP */
-        .popup-overlay {
-          display: none;
-          position: fixed;
-          inset: 0;
-          background: rgba(0, 0, 0, 0.55);
-          z-index: 9999;
-          align-items: center;
-          justify-content: center;
-          padding: 18px;
-        }
-
-        .popup-overlay.active {
-          display: flex;
-        }
-
-        .popup {
-          background: #fff;
-          width: 720px;
-          max-width: 100%;
-          border-radius: 18px;
-          overflow: hidden;
-          position: relative;
-          box-shadow: 0 30px 90px rgba(0, 0, 0, 0.25);
-          border: 1px solid rgba(0, 0, 0, 0.06);
-        }
-
-        .popupHead {
-          padding: 18px 18px 10px;
-          border-bottom: 1px solid rgba(0, 0, 0, 0.06);
-          background: linear-gradient(180deg, rgba(27, 115, 255, 0.06), rgba(255, 255, 255, 1));
-        }
-
-        .popupTitle {
-          margin: 0;
-          font-weight: 520;
-          letter-spacing: -0.02em;
-          font-size: 18px;
-        }
-
-        .popupSub {
-          margin: 6px 0 0;
-          color: #2b3d5a;
-          font-weight: 400;
-          font-size: 12px;
-          line-height: 1.4;
-        }
-
-        .popupBody {
-          padding: 16px 18px 18px;
-        }
-
-        .row {
-          display: grid;
-          grid-template-columns: 1fr 1fr;
-          gap: 12px;
-        }
-
-        label {
-          display: block;
-          font-size: 12px;
-          font-weight: 450;
-          color: var(--label);
-          margin: 0 0 6px;
-        }
-
-        input,
-        textarea {
-          width: 100%;
-          border-radius: 12px;
-          border: 1px solid rgba(0, 0, 0, 0.12);
-          padding: 12px 12px;
-          font-size: 13px;
-          font-weight: 400;
-          outline: none;
-          background: #fff;
-          color: #0b1c33;
-        }
-
-        input:focus,
-        textarea:focus {
-          border-color: rgba(27, 115, 255, 0.55);
-          box-shadow: 0 0 0 4px rgba(27, 115, 255, 0.12);
-        }
-
-        textarea {
-          min-height: 110px;
-          resize: vertical;
-        }
-
-        .actions {
-          display: flex;
-          gap: 10px;
-          justify-content: flex-end;
-          margin-top: 12px;
-        }
-
-        .err {
-          margin-top: 10px;
-          color: #b91c1c;
-          font-weight: 450;
-          font-size: 12px;
-        }
-
-        /* ✅ Success box premium (une seule phrase) */
         .successBox {
-          display: flex;
-          gap: 12px;
-          align-items: flex-start;
-          padding: 14px 14px;
-          border-radius: 16px;
-          background: linear-gradient(180deg, rgba(27, 115, 255, 0.08), rgba(34, 197, 94, 0.06));
-          border: 1px solid rgba(27, 115, 255, 0.18);
+          display:flex; gap:12px; align-items:flex-start;
+          padding:14px; border-radius:14px;
+          background: rgba(27,115,255,.06);
+          border: 1px solid rgba(27,115,255,.18);
         }
-
         .successIcon {
-          width: 34px;
-          height: 34px;
-          border-radius: 999px;
-          display: grid;
-          place-items: center;
-          background: rgba(34, 197, 94, 0.12);
-          border: 1px solid rgba(34, 197, 94, 0.25);
-          color: #0b1c33;
+          width:34px; height:34px; border-radius:999px;
+          display:flex; align-items:center; justify-content:center;
+          background: rgba(34,197,94,.14);
+          border: 1px solid rgba(34,197,94,.28);
+          color: #15803d;
           font-weight: 600;
           flex: 0 0 auto;
+          margin-top: 1px;
         }
-
         .successText {
           margin: 0;
-          color: #0b1c33;
-          font-weight: 400;
+          color: #2b3d5a;
           font-size: 13px;
-          line-height: 1.45;
+          line-height: 1.4;
+          font-weight: 380;
         }
+        .successText a { color: var(--blue); text-decoration: none; }
 
-        .popup-close {
-          position: absolute;
-          top: 10px;
-          right: 12px;
-          width: 40px;
-          height: 40px;
-          border-radius: 999px;
-          border: none;
-          background: #fff;
-          font-size: 22px;
-          cursor: pointer;
-          box-shadow: 0 10px 24px rgba(0, 0, 0, 0.2);
-        }
-
-        .hp {
-          position: absolute;
-          left: -10000px;
-          top: auto;
-          width: 1px;
-          height: 1px;
-          overflow: hidden;
-        }
+        .popup-close { position:absolute; top:10px; right:12px; width:40px; height:40px; border-radius:999px; border:none; background:#fff; font-size:22px; cursor:pointer; box-shadow: 0 10px 24px rgba(0,0,0,.2); }
+        .hp { position:absolute; left:-10000px; top:auto; width:1px; height:1px; overflow:hidden; }
 
         @media (max-width: 980px) {
-          .hero-grid {
-            grid-template-columns: 1fr;
-          }
-          .grid3 {
-            grid-template-columns: 1fr;
-          }
-          .row {
-            grid-template-columns: 1fr;
-          }
+          .hero-grid { grid-template-columns:1fr; }
+          .grid3 { grid-template-columns:1fr; }
+          .row { grid-template-columns:1fr; }
         }
       `}</style>
 
-      {/* HEADER */}
       <header>
         <div className="container">
           <nav>
@@ -738,7 +336,6 @@ export default function Page() {
         </div>
       </header>
 
-      {/* HERO */}
       <section className="hero">
         <div className="container">
           <div className="hero-grid">
@@ -750,20 +347,20 @@ export default function Page() {
               </h1>
 
               <div className="hero-copy">
-                Capture, trace and alert on <strong>temperature</strong>, <strong>humidity</strong>,{" "}
-                <strong>vibration</strong> and <strong>CO₂</strong> in real time.
+                Capture, trace and alert on <strong>temperature</strong>,{" "}
+                <strong>humidity</strong>, <strong>vibration</strong> and{" "}
+                <strong>CO₂</strong> in real time.
                 <br />
                 Seal incidents into <strong>audit-ready proof</strong> on a{" "}
                 <strong>blockchain-secured event ledger</strong>.
                 <br />
                 Use that proof to support compliance, insurance claims — and{" "}
-                <strong>blockchain-triggered payments</strong>.
+                <strong> blockchain-triggered payments</strong>.
               </div>
 
               <div className="hero-tagline">From sensors → proof → payment.</div>
             </div>
 
-            {/* Dashboard */}
             <div className="dashboard">
               <div className="dashboard-header">
                 <strong>Live monitoring</strong>
@@ -783,7 +380,9 @@ export default function Page() {
                       className={`tab ${active ? "active" : ""}`}
                       onClick={() => setMetric(m)}
                       style={
-                        active ? { background: tab.bg, color: tab.fg, borderColor: tab.border } : undefined
+                        active
+                          ? { background: tab.bg, color: tab.fg, borderColor: tab.border }
+                          : undefined
                       }
                     >
                       {metricConfig[m].label}
@@ -796,7 +395,9 @@ export default function Page() {
                 <canvas ref={canvasRef} />
               </div>
 
-              <div className={`alertline ${metricConfig[metric].cls}`}>{metricConfig[metric].status}</div>
+              <div className={`alertline ${metricConfig[metric].cls}`}>
+                {metricConfig[metric].status}
+              </div>
 
               <div className="chips">
                 <span className="chip">
@@ -817,7 +418,8 @@ export default function Page() {
 
           <div className="centerTitle">From sensors to proof</div>
           <div className="centerSub">
-            Enthalpy turns real-world incidents into trusted digital evidence that can trigger compliance actions or payments.
+            Enthalpy turns real-world incidents into trusted digital evidence that can trigger
+            compliance actions or payments.
           </div>
 
           <div className="grid3">
@@ -870,7 +472,6 @@ export default function Page() {
         </div>
       </section>
 
-      {/* POPUP */}
       <div
         className={`popup-overlay ${popupOpen ? "active" : ""}`}
         onMouseDown={(e) => {
@@ -890,19 +491,24 @@ export default function Page() {
           <div className="popupBody">
             {submitted ? (
               <div className="successBox">
-                <span className="successIcon">✓</span>
+                <div className="successIcon">✓</div>
                 <p className="successText">
-                  ✅ Request received. A confirmation email is on its way — if you don’t see it, please check Spam or contact
-                  contact@enthalpy.site.
+                  Request received. A confirmation email has been sent. If you don’t see it, check
+                  Spam or contact{" "}
+                  <a href="mailto:contact@enthalpy.site">contact@enthalpy.site</a>.
                 </p>
               </div>
             ) : (
               <form onSubmit={submitForm}>
-                {/* Honeypot */}
                 <div className="hp">
                   <label>
                     Website
-                    <input name="website" value={form.website} onChange={onChange} autoComplete="off" />
+                    <input
+                      name="website"
+                      value={form.website}
+                      onChange={onChange}
+                      autoComplete="off"
+                    />
                   </label>
                 </div>
 
@@ -956,7 +562,12 @@ export default function Page() {
                 {errorMsg ? <div className="err">{errorMsg}</div> : null}
 
                 <div className="actions">
-                  <button type="button" className="btn btn-ghost" onClick={closePopup} disabled={submitting}>
+                  <button
+                    type="button"
+                    className="btn btn-ghost"
+                    onClick={closePopup}
+                    disabled={submitting}
+                  >
                     Cancel
                   </button>
                   <button type="submit" className="btn btn-primary" disabled={submitting}>
