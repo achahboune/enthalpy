@@ -72,6 +72,8 @@ export default function Page() {
     return cfg
   }, [])
 
+  const API_URL = "/api/pilot-access/" // ✅ évite le 308 redirect si trailingSlash
+
   function openPopup() {
     setPopupOpen(true)
     setSubmitted(false)
@@ -97,14 +99,12 @@ export default function Page() {
 
     if (!form.company.trim()) return setErrorMsg("Company name is required.")
     if (!form.email.trim()) return setErrorMsg("Work email is required.")
-    if (!/^\S+@\S+\.\S+$/.test(form.email.trim()))
-      return setErrorMsg("Please enter a valid email.")
+    if (!/^\S+@\S+\.\S+$/.test(form.email.trim())) return setErrorMsg("Please enter a valid email.")
     if (!form.message.trim()) return setErrorMsg("Message is required.")
 
     setSubmitting(true)
     try {
-      // ⚠️ si ton next.config a trailingSlash=true, garde le "/" à la fin
-      const res = await fetch("/api/pilot-access/", {
+      const res = await fetch(API_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -197,7 +197,7 @@ export default function Page() {
           --ok: #22c55e;
           --warn: #f59e0b;
           --risk: #ef4444;
-          --label: #51627f; /* froid */
+          --label: #51627f;
         }
 
         * {
@@ -207,7 +207,7 @@ export default function Page() {
         body {
           margin: 0;
           font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
-          font-weight: 360; /* ✅ plus fin */
+          font-weight: 400;
           -webkit-font-smoothing: antialiased;
           -moz-osx-font-smoothing: grayscale;
           background: radial-gradient(
@@ -221,7 +221,7 @@ export default function Page() {
 
         strong,
         b {
-          font-weight: 430; /* ✅ très léger */
+          font-weight: 500; /* ✅ pas “gras lourd” */
         }
 
         .container {
@@ -262,7 +262,7 @@ export default function Page() {
           color: var(--dark);
           font-size: 18px;
           line-height: 1;
-          font-weight: 500; /* ✅ plus fin */
+          font-weight: 520;
         }
 
         .logo span {
@@ -271,7 +271,7 @@ export default function Page() {
           font-size: 11px;
           letter-spacing: 0.18em;
           color: #4a5d7a;
-          font-weight: 420; /* ✅ */
+          font-weight: 450;
           white-space: nowrap;
         }
 
@@ -279,14 +279,14 @@ export default function Page() {
           padding: 12px 22px;
           border-radius: 999px;
           border: none;
-          font-weight: 460; /* ✅ */
+          font-weight: 520;
           cursor: pointer;
         }
 
         .btn-primary {
           background: linear-gradient(135deg, #1b73ff, #00c8ff);
           color: #fff;
-          box-shadow: 0 14px 30px rgba(27, 115, 255, 0.35);
+          box-shadow: 0 14px 30px rgba(27, 115, 255, 0.28);
         }
 
         .btn-ghost {
@@ -311,7 +311,7 @@ export default function Page() {
           margin: 0;
           letter-spacing: -0.02em;
           line-height: 1.02;
-          font-weight: 520; /* ✅ beaucoup plus fin */
+          font-weight: 560; /* ✅ plus fin */
         }
 
         h1 span {
@@ -321,16 +321,16 @@ export default function Page() {
         .hero-copy {
           margin-top: 14px;
           color: #2b3d5a;
-          font-weight: 360; /* ✅ */
+          font-weight: 400;
           max-width: 560px;
-          line-height: 1.6;
+          line-height: 1.55;
           font-size: 14px;
         }
 
         .hero-tagline {
           margin-top: 12px;
           color: var(--blue);
-          font-weight: 440; /* ✅ */
+          font-weight: 500;
           font-size: 13px;
         }
 
@@ -350,7 +350,7 @@ export default function Page() {
         }
 
         .dashboard-header strong {
-          font-weight: 480; /* ✅ */
+          font-weight: 520;
         }
 
         .status {
@@ -359,7 +359,7 @@ export default function Page() {
           gap: 8px;
           font-size: 12px;
           color: #2b3d5a;
-          font-weight: 380; /* ✅ */
+          font-weight: 450;
         }
 
         .dot {
@@ -384,7 +384,7 @@ export default function Page() {
           font-size: 12px;
           background: #eef3ff;
           cursor: pointer;
-          font-weight: 440; /* ✅ */
+          font-weight: 500;
           display: flex;
           align-items: center;
           justify-content: center;
@@ -401,7 +401,7 @@ export default function Page() {
 
         .alertline {
           margin-top: 10px;
-          font-weight: 420; /* ✅ */
+          font-weight: 450;
           font-size: 12px;
         }
 
@@ -429,7 +429,7 @@ export default function Page() {
           border-radius: 999px;
           padding: 6px 10px;
           font-size: 11px;
-          font-weight: 380; /* ✅ */
+          font-weight: 450;
           background: rgba(0, 0, 0, 0.04);
           border: 1px solid rgba(0, 0, 0, 0.06);
           color: #0b1c33;
@@ -443,7 +443,7 @@ export default function Page() {
 
         .centerTitle {
           text-align: center;
-          font-weight: 480; /* ✅ */
+          font-weight: 520;
           font-size: 18px;
           margin: 24px 0 6px;
           letter-spacing: -0.01em;
@@ -454,7 +454,7 @@ export default function Page() {
           margin: 0 auto 22px;
           max-width: 720px;
           color: var(--muted);
-          font-weight: 360; /* ✅ */
+          font-weight: 400;
           font-size: 13px;
         }
 
@@ -484,7 +484,7 @@ export default function Page() {
         }
 
         .stepTitle {
-          font-weight: 460; /* ✅ */
+          font-weight: 520;
           margin: 0 0 4px;
           font-size: 13px;
         }
@@ -492,14 +492,14 @@ export default function Page() {
         .stepText {
           margin: 0;
           color: #2b3d5a;
-          font-weight: 360; /* ✅ */
+          font-weight: 400;
           font-size: 12px;
-          line-height: 1.45;
+          line-height: 1.4;
         }
 
         .industryTitle {
           text-align: center;
-          font-weight: 480; /* ✅ */
+          font-weight: 520;
           font-size: 20px;
           margin: 26px 0 14px;
           letter-spacing: -0.01em;
@@ -516,14 +516,14 @@ export default function Page() {
         .industryCard h3 {
           margin: 0 0 6px;
           color: var(--blue);
-          font-weight: 460; /* ✅ */
+          font-weight: 520;
           font-size: 14px;
         }
 
         .industryCard p {
           margin: 0;
           color: #2b3d5a;
-          font-weight: 360; /* ✅ */
+          font-weight: 400;
           font-size: 12px;
         }
 
@@ -531,12 +531,12 @@ export default function Page() {
           text-align: center;
           padding: 26px 0 34px;
           color: #2b3d5a;
-          font-weight: 360; /* ✅ */
+          font-weight: 400;
           font-size: 12px;
         }
 
         .footer .email {
-          font-weight: 460; /* ✅ */
+          font-weight: 520;
           color: #0b1c33;
           font-size: 13px;
         }
@@ -544,7 +544,7 @@ export default function Page() {
         .footer .loc {
           margin-top: 6px;
           color: #6c7a92;
-          font-weight: 380; /* ✅ */
+          font-weight: 450;
         }
 
         /* POPUP */
@@ -577,16 +577,12 @@ export default function Page() {
         .popupHead {
           padding: 18px 18px 10px;
           border-bottom: 1px solid rgba(0, 0, 0, 0.06);
-          background: linear-gradient(
-            180deg,
-            rgba(27, 115, 255, 0.06),
-            rgba(255, 255, 255, 1)
-          );
+          background: linear-gradient(180deg, rgba(27, 115, 255, 0.06), rgba(255, 255, 255, 1));
         }
 
         .popupTitle {
           margin: 0;
-          font-weight: 480; /* ✅ */
+          font-weight: 520;
           letter-spacing: -0.02em;
           font-size: 18px;
         }
@@ -594,9 +590,9 @@ export default function Page() {
         .popupSub {
           margin: 6px 0 0;
           color: #2b3d5a;
-          font-weight: 360; /* ✅ */
+          font-weight: 400;
           font-size: 12px;
-          line-height: 1.45;
+          line-height: 1.4;
         }
 
         .popupBody {
@@ -609,11 +605,10 @@ export default function Page() {
           gap: 12px;
         }
 
-        /* ✅ labels froids + fins */
         label {
           display: block;
           font-size: 12px;
-          font-weight: 420;
+          font-weight: 450;
           color: var(--label);
           margin: 0 0 6px;
         }
@@ -625,7 +620,7 @@ export default function Page() {
           border: 1px solid rgba(0, 0, 0, 0.12);
           padding: 12px 12px;
           font-size: 13px;
-          font-weight: 360; /* ✅ */
+          font-weight: 400;
           outline: none;
           background: #fff;
           color: #0b1c33;
@@ -652,17 +647,38 @@ export default function Page() {
         .err {
           margin-top: 10px;
           color: #b91c1c;
-          font-weight: 420;
+          font-weight: 450;
           font-size: 12px;
         }
 
-        .okBox {
-          padding: 14px;
-          border-radius: 14px;
-          background: rgba(34, 197, 94, 0.1);
-          border: 1px solid rgba(34, 197, 94, 0.2);
+        /* ✅ Success box premium (une seule phrase) */
+        .successBox {
+          display: flex;
+          gap: 12px;
+          align-items: flex-start;
+          padding: 14px 14px;
+          border-radius: 16px;
+          background: linear-gradient(180deg, rgba(27, 115, 255, 0.08), rgba(34, 197, 94, 0.06));
+          border: 1px solid rgba(27, 115, 255, 0.18);
+        }
+
+        .successIcon {
+          width: 34px;
+          height: 34px;
+          border-radius: 999px;
+          display: grid;
+          place-items: center;
+          background: rgba(34, 197, 94, 0.12);
+          border: 1px solid rgba(34, 197, 94, 0.25);
           color: #0b1c33;
-          font-weight: 360;
+          font-weight: 600;
+          flex: 0 0 auto;
+        }
+
+        .successText {
+          margin: 0;
+          color: #0b1c33;
+          font-weight: 400;
           font-size: 13px;
           line-height: 1.45;
         }
@@ -734,9 +750,8 @@ export default function Page() {
               </h1>
 
               <div className="hero-copy">
-                Capture, trace and alert on <strong>temperature</strong>,{" "}
-                <strong>humidity</strong>, <strong>vibration</strong> and{" "}
-                <strong>CO₂</strong> in real time.
+                Capture, trace and alert on <strong>temperature</strong>, <strong>humidity</strong>,{" "}
+                <strong>vibration</strong> and <strong>CO₂</strong> in real time.
                 <br />
                 Seal incidents into <strong>audit-ready proof</strong> on a{" "}
                 <strong>blockchain-secured event ledger</strong>.
@@ -768,9 +783,7 @@ export default function Page() {
                       className={`tab ${active ? "active" : ""}`}
                       onClick={() => setMetric(m)}
                       style={
-                        active
-                          ? { background: tab.bg, color: tab.fg, borderColor: tab.border }
-                          : undefined
+                        active ? { background: tab.bg, color: tab.fg, borderColor: tab.border } : undefined
                       }
                     >
                       {metricConfig[m].label}
@@ -783,9 +796,7 @@ export default function Page() {
                 <canvas ref={canvasRef} />
               </div>
 
-              <div className={`alertline ${metricConfig[metric].cls}`}>
-                {metricConfig[metric].status}
-              </div>
+              <div className={`alertline ${metricConfig[metric].cls}`}>{metricConfig[metric].status}</div>
 
               <div className="chips">
                 <span className="chip">
@@ -806,8 +817,7 @@ export default function Page() {
 
           <div className="centerTitle">From sensors to proof</div>
           <div className="centerSub">
-            Enthalpy turns real-world incidents into trusted digital evidence that can trigger
-            compliance actions or payments.
+            Enthalpy turns real-world incidents into trusted digital evidence that can trigger compliance actions or payments.
           </div>
 
           <div className="grid3">
@@ -879,10 +889,12 @@ export default function Page() {
 
           <div className="popupBody">
             {submitted ? (
-              <div className="okBox">
-                ✅ Request sent. You’ll receive a short confirmation email.
-                <br />
-                If you don’t see it: check Spam, or email <b>contact@enthalpy.site</b>.
+              <div className="successBox">
+                <span className="successIcon">✓</span>
+                <p className="successText">
+                  ✅ Request received. A confirmation email is on its way — if you don’t see it, please check Spam or contact
+                  contact@enthalpy.site.
+                </p>
               </div>
             ) : (
               <form onSubmit={submitForm}>
@@ -890,12 +902,7 @@ export default function Page() {
                 <div className="hp">
                   <label>
                     Website
-                    <input
-                      name="website"
-                      value={form.website}
-                      onChange={onChange}
-                      autoComplete="off"
-                    />
+                    <input name="website" value={form.website} onChange={onChange} autoComplete="off" />
                   </label>
                 </div>
 
@@ -949,12 +956,7 @@ export default function Page() {
                 {errorMsg ? <div className="err">{errorMsg}</div> : null}
 
                 <div className="actions">
-                  <button
-                    type="button"
-                    className="btn btn-ghost"
-                    onClick={closePopup}
-                    disabled={submitting}
-                  >
+                  <button type="button" className="btn btn-ghost" onClick={closePopup} disabled={submitting}>
                     Cancel
                   </button>
                   <button type="submit" className="btn btn-primary" disabled={submitting}>
