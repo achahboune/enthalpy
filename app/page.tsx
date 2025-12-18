@@ -183,8 +183,6 @@ export default function Page() {
     c.update()
   }, [metric, metricConfig])
 
-  const alertCls = metricConfig[metric].cls
-
   return (
     <>
       <style jsx global>{`
@@ -197,7 +195,7 @@ export default function Page() {
           --ok: #22c55e;
           --warn: #f59e0b;
           --risk: #ef4444;
-          --label: #51627f; /* ✅ froid */
+          --label: #51627f; /* froid */
         }
 
         * {
@@ -206,8 +204,10 @@ export default function Page() {
 
         body {
           margin: 0;
-          font-family: Inter, system-ui, sans-serif;
-          font-weight: 420; /* ✅ plus fin */
+          font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+          font-weight: 400; /* ✅ plus fin global */
+          -webkit-font-smoothing: antialiased;
+          -moz-osx-font-smoothing: grayscale;
           background: radial-gradient(
               1200px 600px at 70% 0%,
               rgba(27, 115, 255, 0.12),
@@ -217,8 +217,9 @@ export default function Page() {
           color: var(--dark);
         }
 
-        strong {
-          font-weight: 600; /* ✅ au lieu de très bold */
+        strong,
+        b {
+          font-weight: 500; /* ✅ au lieu de gras lourd */
         }
 
         .container {
@@ -259,7 +260,7 @@ export default function Page() {
           color: var(--dark);
           font-size: 18px;
           line-height: 1;
-          font-weight: 650; /* ✅ */
+          font-weight: 550; /* ✅ plus fin */
         }
 
         .logo span {
@@ -268,7 +269,7 @@ export default function Page() {
           font-size: 11px;
           letter-spacing: 0.18em;
           color: #4a5d7a;
-          font-weight: 650; /* ✅ */
+          font-weight: 500; /* ✅ */
           white-space: nowrap;
         }
 
@@ -276,7 +277,7 @@ export default function Page() {
           padding: 12px 22px;
           border-radius: 999px;
           border: none;
-          font-weight: 650; /* ✅ */
+          font-weight: 520; /* ✅ */
           cursor: pointer;
         }
 
@@ -308,7 +309,7 @@ export default function Page() {
           margin: 0;
           letter-spacing: -0.02em;
           line-height: 1.02;
-          font-weight: 800; /* ✅ titre ok */
+          font-weight: 600; /* ✅ plus fin que 800 */
         }
 
         h1 span {
@@ -318,7 +319,7 @@ export default function Page() {
         .hero-copy {
           margin-top: 14px;
           color: #2b3d5a;
-          font-weight: 420; /* ✅ plus fin */
+          font-weight: 400; /* ✅ */
           max-width: 560px;
           line-height: 1.55;
           font-size: 14px;
@@ -327,7 +328,7 @@ export default function Page() {
         .hero-tagline {
           margin-top: 12px;
           color: var(--blue);
-          font-weight: 650; /* ✅ */
+          font-weight: 520; /* ✅ */
           font-size: 13px;
         }
 
@@ -347,7 +348,7 @@ export default function Page() {
         }
 
         .dashboard-header strong {
-          font-weight: 650; /* ✅ */
+          font-weight: 550; /* ✅ */
         }
 
         .status {
@@ -356,7 +357,7 @@ export default function Page() {
           gap: 8px;
           font-size: 12px;
           color: #2b3d5a;
-          font-weight: 520; /* ✅ */
+          font-weight: 450; /* ✅ */
         }
 
         .dot {
@@ -381,7 +382,7 @@ export default function Page() {
           font-size: 12px;
           background: #eef3ff;
           cursor: pointer;
-          font-weight: 650; /* ✅ */
+          font-weight: 520; /* ✅ */
           display: flex;
           align-items: center;
           justify-content: center;
@@ -398,7 +399,7 @@ export default function Page() {
 
         .alertline {
           margin-top: 10px;
-          font-weight: 520; /* ✅ */
+          font-weight: 450; /* ✅ */
           font-size: 12px;
         }
 
@@ -426,7 +427,7 @@ export default function Page() {
           border-radius: 999px;
           padding: 6px 10px;
           font-size: 11px;
-          font-weight: 520; /* ✅ */
+          font-weight: 450; /* ✅ */
           background: rgba(0, 0, 0, 0.04);
           border: 1px solid rgba(0, 0, 0, 0.06);
           color: #0b1c33;
@@ -440,7 +441,7 @@ export default function Page() {
 
         .centerTitle {
           text-align: center;
-          font-weight: 650; /* ✅ */
+          font-weight: 520; /* ✅ */
           font-size: 18px;
           margin: 24px 0 6px;
           letter-spacing: -0.01em;
@@ -451,7 +452,7 @@ export default function Page() {
           margin: 0 auto 22px;
           max-width: 720px;
           color: var(--muted);
-          font-weight: 420; /* ✅ */
+          font-weight: 400; /* ✅ */
           font-size: 13px;
         }
 
@@ -481,7 +482,7 @@ export default function Page() {
         }
 
         .stepTitle {
-          font-weight: 650; /* ✅ */
+          font-weight: 520; /* ✅ */
           margin: 0 0 4px;
           font-size: 13px;
         }
@@ -489,14 +490,14 @@ export default function Page() {
         .stepText {
           margin: 0;
           color: #2b3d5a;
-          font-weight: 420; /* ✅ */
+          font-weight: 400; /* ✅ */
           font-size: 12px;
           line-height: 1.4;
         }
 
         .industryTitle {
           text-align: center;
-          font-weight: 650; /* ✅ */
+          font-weight: 520; /* ✅ */
           font-size: 20px;
           margin: 26px 0 14px;
           letter-spacing: -0.01em;
@@ -513,14 +514,14 @@ export default function Page() {
         .industryCard h3 {
           margin: 0 0 6px;
           color: var(--blue);
-          font-weight: 650; /* ✅ */
+          font-weight: 520; /* ✅ */
           font-size: 14px;
         }
 
         .industryCard p {
           margin: 0;
           color: #2b3d5a;
-          font-weight: 420; /* ✅ */
+          font-weight: 400; /* ✅ */
           font-size: 12px;
         }
 
@@ -528,12 +529,12 @@ export default function Page() {
           text-align: center;
           padding: 26px 0 34px;
           color: #2b3d5a;
-          font-weight: 420; /* ✅ */
+          font-weight: 400; /* ✅ */
           font-size: 12px;
         }
 
         .footer .email {
-          font-weight: 650; /* ✅ */
+          font-weight: 520; /* ✅ */
           color: #0b1c33;
           font-size: 13px;
         }
@@ -541,7 +542,7 @@ export default function Page() {
         .footer .loc {
           margin-top: 6px;
           color: #6c7a92;
-          font-weight: 520; /* ✅ */
+          font-weight: 450; /* ✅ */
         }
 
         /* POPUP */
@@ -583,7 +584,7 @@ export default function Page() {
 
         .popupTitle {
           margin: 0;
-          font-weight: 650; /* ✅ */
+          font-weight: 520; /* ✅ */
           letter-spacing: -0.02em;
           font-size: 18px;
         }
@@ -591,7 +592,7 @@ export default function Page() {
         .popupSub {
           margin: 6px 0 0;
           color: #2b3d5a;
-          font-weight: 420; /* ✅ */
+          font-weight: 400; /* ✅ */
           font-size: 12px;
           line-height: 1.4;
         }
@@ -606,12 +607,11 @@ export default function Page() {
           gap: 12px;
         }
 
-        /* ✅ Labels couleur + plus fins */
         label {
           display: block;
           font-size: 12px;
-          font-weight: 520; /* ✅ */
-          color: var(--label); /* ✅ */
+          font-weight: 450; /* ✅ */
+          color: var(--label);
           margin: 0 0 6px;
         }
 
@@ -622,7 +622,7 @@ export default function Page() {
           border: 1px solid rgba(0, 0, 0, 0.12);
           padding: 12px 12px;
           font-size: 13px;
-          font-weight: 420; /* ✅ */
+          font-weight: 400; /* ✅ */
           outline: none;
           background: #fff;
           color: #0b1c33;
@@ -649,7 +649,7 @@ export default function Page() {
         .err {
           margin-top: 10px;
           color: #b91c1c;
-          font-weight: 520; /* ✅ */
+          font-weight: 450; /* ✅ */
           font-size: 12px;
         }
 
@@ -659,7 +659,7 @@ export default function Page() {
           background: rgba(34, 197, 94, 0.1);
           border: 1px solid rgba(34, 197, 94, 0.2);
           color: #0b1c33;
-          font-weight: 420; /* ✅ */
+          font-weight: 400; /* ✅ */
           font-size: 13px;
           line-height: 1.4;
         }
