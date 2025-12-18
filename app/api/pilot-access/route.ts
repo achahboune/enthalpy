@@ -1,4 +1,18 @@
 import { NextResponse } from "next/server"
+import { Resend } from "resend"
+
+
+// ⚠️ Si ton front et ton API sont sur le même domaine, CORS n’est pas obligatoire.
+// Mais comme tu as vu du 405, je le laisse pour éviter les préflights cross-domain.
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Methods": "POST,OPTIONS",
+  "Access-Control-Allow-Headers": "Content-Type",
+}
+
+export function OPTIONS() {
+  return new NextResponse(null, { status: 204, headers: corsHeaders })
+}
 
 export async function POST(req: Request) {
   try {
@@ -6,75 +20,72 @@ export async function POST(req: Request) {
 
     // Honeypot anti-bot
     if (body?.website && String(body.website).trim().length > 0) {
-      return NextResponse.json({ ok: true })
+      return NextResponse.json({ ok: true }, { status: 200, headers: corsHeaders })
     }
 
-    const name = String(body?.name || "").trim()
-    const company = String(body?.company || "").trim()
-    const email = String(body?.email || "").trim()
-    const message = String(body?.message || "").trim()
+    const name = String(body?.name ?? "").trim()
+    const company = String(body?.company ?? "").trim()
+    const email = String(body?.email ?? "").trim()
+    const message = String(body?.message ?? "").trim()
 
-    if (!company) return NextResponse.json({ error: "Company is required" }, { status: 400 })
-    if (!email || !/^\S+@\S+\.\S+$/.test(email)) {
-      return NextResponse.json({ error: "Valid email is required" }, { status: 400 })
-    }
-    if (!message) return NextResponse.json({ error: "Message is required" }, { status: 400 })
-
-    const RESEND_API_KEY = process.env.RESEND_API_KEY
-    const PILOT_TO_EMAIL = process.env.PILOT_TO_EMAIL || "contact@enthalpy.site"
-    const PILOT_FROM_EMAIL = process.env.PILOT_FROM_EMAIL || "Enthalpy <onboarding@resend.dev>"
-
-    if (!RESEND_API_KEY) {
-      return NextResponse.json({ error: "Missing RESEND_API_KEY" }, { status: 500 })
-    }
-
-    const subject = `Pilot access request — ${company}`
-    const html = `
-      <div style="font-family: Inter, system-ui, Arial; line-height:1.5">
-        <h2 style="margin:0 0 10px 0;">New pilot request</h2>
-        <p><b>Name:</b> ${escapeHtml(name || "-")}</p>
-        <p><b>Company:</b> ${escapeHtml(company)}</p>
-        <p><b>Email:</b> ${escapeHtml(email)}</p>
-        <p><b>Message:</b><br/>${escapeHtml(message).replace(/\n/g, "<br/>")}</p>
-      </div>
-    `
-
-    const r = await fetch("https://api.resend.com/emails", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${RESEND_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        from: PILOT_FROM_EMAIL,
-        to: [PILOT_TO_EMAIL],
-        reply_to: email, // utile même si from = resend.dev
-        subject,
-        html,
-      }),
-    })
-
-    const data = await r.json().catch(() => ({}))
-
-    if (!r.ok) {
-      // Renvoie l’erreur exacte à ton UI (tu la verras)
+    if (!company || !email || !message) {
       return NextResponse.json(
-        { error: data?.message || "Email sending failed", resend: data },
-        { status: 500 }
+        { error: "Missing fields: company, email, message" },
+        { status: 400, headers: corsHeaders }
       )
     }
 
-    return NextResponse.json({ ok: true })
-  } catch (e: any) {
-    return NextResponse.json({ error: "Server error" }, { status: 500 })
-  }
-}
+    const apiKey = process.env.RESEND_API_KEY
+    const to = process.env.PILOT_TO_EMAIL
+    const from = process.env.PILOT_FROM_EMAIL || "Enthalpy <no-reply@enthalpy.site>"
 
-function escapeHtml(s: string) {
-  return s
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#039;")
+    if (!apiKey) {
+      return NextResponse.json(
+        { error: "Server misconfig: RESEND_API_KEY missing" },
+        { status: 500, headers: corsHeaders }
+      )
+    }
+    if (!to) {
+      return NextResponse.json(
+        { error: "Server misconfig: PILOT_TO_EMAIL missing" },
+        { status: 500, headers: corsHeaders }
+      )
+    }
+
+    const resend = new Resend(apiKey)
+
+    // Email vers toi (admin)
+    await resend.emails.send({
+      from,
+      to,
+      replyTo: email,
+      subject: `Pilot request — ${company}`,
+      text:
+        `Name: ${name || "-"}\n` +
+        `Company: ${company}\n` +
+        `Email: ${email}\n\n` +
+        `Message:\n${message}\n`,
+    })
+
+    // Confirmation au client (optionnel)
+    try {
+      await resend.emails.send({
+        from,
+        to: email,
+        subject: "Enthalpy — pilot request received",
+        text: `Thanks${name ? " " + name : ""}! We received your request and will reply shortly.\n\n— Enthalpy`,
+      })
+    } catch (e) {
+      // si ça rate, on ne bloque pas la requête principale
+      console.warn("CONFIRMATION_EMAIL_FAILED", e)
+    }
+
+    return NextResponse.json({ ok: true }, { status: 200, headers: corsHeaders })
+  } catch (err: any) {
+    console.error("PILOT_ACCESS_ERROR", err)
+    return NextResponse.json(
+      { error: err?.message || "Email sending failed" },
+      { status: 500, headers: corsHeaders }
+    )
+  }
 }
