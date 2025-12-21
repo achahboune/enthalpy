@@ -191,7 +191,7 @@ export default function Page() {
           --dark: #061325;
           --muted: rgba(6, 19, 37, 0.74);
 
-          --glass: rgba(255, 255, 255, 0.40);
+          --glass: rgba(255, 255, 255, 0.72);
           --glassStrong: rgba(255, 255, 255, 0.58);
           --stroke: rgba(255, 255, 255, 0.20);
 
@@ -229,7 +229,7 @@ export default function Page() {
           inset: 0;
           background: radial-gradient(900px 520px at 18% 12%, rgba(255, 255, 255, 0.30), rgba(255, 255, 255, 0.08)),
             radial-gradient(1000px 650px at 82% 16%, rgba(27, 115, 255, 0.12), rgba(27, 115, 255, 0.02)),
-            linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(0, 0, 0, 0.10));
+            linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(0, 0, 0, 0.22));
           pointer-events: none;
           z-index: 0;
         }
@@ -405,15 +405,41 @@ export default function Page() {
           font-weight: 560;
         }
 
-        /* ✅ un peu plus visible (mais pas gras comme du bold) */
+        /* ✅ TRANSPARENT + lisible (frosted glass) */
         .lead {
+          position: relative;
           margin-top: 12px;
-          font-size: 20px;
-          line-height: 1.65;
-          color: rgba(6, 19, 37, 0.88);
-          font-weight: 580;
           max-width: 720px;
-          text-shadow: 0 1px 0 rgba(255, 255, 255, 0.55), 0 2px 10px rgba(0, 0, 0, 0.06);
+          padding: 14px 16px;
+          border-radius: 14px;
+
+          /* ultra-transparent, mais lisible */
+          background: rgba(255, 255, 255, 0.14);
+          border: 1px solid rgba(255, 255, 255, 0.28);
+          backdrop-filter: blur(18px) saturate(160%);
+          -webkit-backdrop-filter: blur(18px) saturate(160%);
+
+          color: rgba(6, 12, 24, 0.95);
+          font-weight: 650;
+          font-size: 18px;
+          line-height: 1.7;
+
+          box-shadow: 0 10px 30px rgba(0, 0, 0, 0.10);
+          text-shadow: 0 1px 0 rgba(255, 255, 255, 0.55), 0 10px 22px rgba(0, 0, 0, 0.22);
+        }
+
+        /* micro "scrim" interne pour stabiliser le contraste sans rendre opaque */
+        .lead::before {
+          content: "";
+          position: absolute;
+          inset: 0;
+          border-radius: inherit;
+          pointer-events: none;
+          background: linear-gradient(
+            180deg,
+            rgba(255, 255, 255, 0.18),
+            rgba(255, 255, 255, 0.06)
+          );
         }
 
         /* pas de bold agressif */
@@ -876,7 +902,6 @@ export default function Page() {
           <div className="container">
             <nav>
               <div className="brand">
-                {/* 👉 idéal: mettre un logo transparent ici (ex: /assets/logo-transparent.png) */}
                 <img src="/assets/logo.png" alt="Enthalpy" />
                 <div>
                   <strong>Enthalpy</strong>
@@ -904,11 +929,12 @@ export default function Page() {
                     </h1>
 
                     <div className="lead">
-                      Enthalpy monitors temperature, humidity, vibration and CO₂ in real time across warehouses, trucks and
-                      containers.
+                      Enthalpy monitors temperature, humidity, vibration and CO₂
+                      in real time across warehouses, trucks and containers.
                       <br />
-                      When an incident happens, the data is timestamped and sealed as proof on blockchain — and the same
-                      blockchain record can trigger automatic payment (partners, insurance, claims, SLA).
+                      When an incident happens, the data is timestamped and sealed
+                      as proof on blockchain — and the same blockchain record can
+                      trigger automatic payment (partners, insurance, claims, SLA).
                     </div>
 
                     <div className="chips">
@@ -987,7 +1013,6 @@ export default function Page() {
                         {chart.min.toFixed(metric === "vibration" ? 2 : 0)} {chart.s.unit}
                       </text>
 
-                      {/* ✅ couleur selon statut */}
                       <polyline
                         points={chart.points}
                         fill="none"
