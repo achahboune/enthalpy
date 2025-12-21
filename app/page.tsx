@@ -5,6 +5,9 @@ import React, { useEffect, useMemo, useState } from "react"
 
 type Metric = "temp" | "humidity" | "vibration" | "co2"
 
+// ✅ change cette valeur à chaque deploy si besoin (force refresh sur mobile/PC)
+const ASSET_VERSION = "20251221-2"
+
 const SERIES: Record<
   Metric,
   { label: string; unit: string; data: number[]; alert: string; yMin?: number; yMax?: number }
@@ -217,12 +220,11 @@ export default function Page() {
           color: var(--dark);
           overflow-x: hidden;
 
-          /* background */
-          background: url("/assets/bg-ocean.jpg") center / cover no-repeat fixed;
+          /* ✅ versionné (force refresh) */
+          background: url("/assets/bg-ocean.jpg?v=${ASSET_VERSION}") center / cover no-repeat fixed;
           position: relative;
         }
 
-        /* voile global léger (pour lisibilité, mais on voit bien l’arrière-plan) */
         body::before {
           content: "";
           position: fixed;
@@ -234,12 +236,11 @@ export default function Page() {
           z-index: 0;
         }
 
-        /* ✅ Satellite BIEN VISIBLE à gauche */
         body::after {
           content: "";
           position: fixed;
           inset: 0;
-          background: url("/assets/satellite.png") left 6% top 12% / 520px auto no-repeat;
+          background: url("/assets/satellite.png?v=${ASSET_VERSION}") left 6% top 12% / 520px auto no-repeat;
           opacity: 0.96;
           filter: drop-shadow(0 18px 40px rgba(0, 0, 0, 0.22));
           pointer-events: none;
@@ -276,7 +277,6 @@ export default function Page() {
           gap: 16px;
         }
 
-        /* ✅ logo fond plus clean (minimal) */
         .brand {
           display: inline-flex;
           align-items: center;
@@ -360,18 +360,16 @@ export default function Page() {
           padding: 20px;
         }
 
-        /* ✅ terminal/pc derrière plus visible */
         .heroCard::before {
           content: "";
           position: absolute;
           inset: 0;
-          background: url("/assets/hero-iot-proof.png") right center / cover no-repeat;
+          background: url("/assets/hero-iot-proof.png?v=${ASSET_VERSION}") right center / cover no-repeat;
           opacity: 0.62;
           filter: saturate(1.05) contrast(1.05);
           pointer-events: none;
         }
 
-        /* ✅ voile beaucoup plus fin (on voit ce qui est derrière) */
         .heroCard::after {
           content: "";
           position: absolute;
@@ -391,7 +389,6 @@ export default function Page() {
           max-width: 760px;
         }
 
-        /* ✅ typo fine / minimal */
         h1 {
           margin: 0;
           letter-spacing: -0.02em;
@@ -405,7 +402,7 @@ export default function Page() {
           font-weight: 560;
         }
 
-        /* ✅ TRANSPARENT + lisible (frosted glass) */
+        /* ✅ TRANSPARENT + lisible */
         .lead {
           position: relative;
           margin-top: 12px;
@@ -413,7 +410,6 @@ export default function Page() {
           padding: 14px 16px;
           border-radius: 14px;
 
-          /* ultra-transparent, mais lisible */
           background: rgba(255, 255, 255, 0.14);
           border: 1px solid rgba(255, 255, 255, 0.28);
           backdrop-filter: blur(18px) saturate(160%);
@@ -428,21 +424,15 @@ export default function Page() {
           text-shadow: 0 1px 0 rgba(255, 255, 255, 0.55), 0 10px 22px rgba(0, 0, 0, 0.22);
         }
 
-        /* micro "scrim" interne pour stabiliser le contraste sans rendre opaque */
         .lead::before {
           content: "";
           position: absolute;
           inset: 0;
           border-radius: inherit;
           pointer-events: none;
-          background: linear-gradient(
-            180deg,
-            rgba(255, 255, 255, 0.18),
-            rgba(255, 255, 255, 0.06)
-          );
+          background: linear-gradient(180deg, rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0.06));
         }
 
-        /* pas de bold agressif */
         b,
         strong {
           font-weight: 560;
@@ -571,7 +561,6 @@ export default function Page() {
           font-weight: 520;
         }
 
-        /* ✅ alert couleurs vert/orange/rouge */
         .alert {
           font-size: 12px;
           font-weight: 520;
@@ -594,7 +583,6 @@ export default function Page() {
           border: 1px solid rgba(239, 68, 68, 0.22);
         }
 
-        /* ✅ bas plus lisible, plus bleu, moins “noir” */
         .lower {
           margin-top: 14px;
           padding: 14px;
@@ -609,34 +597,38 @@ export default function Page() {
           margin: 0 0 10px;
         }
 
-        .features {
+        .features,
+        .industries {
           display: grid;
           grid-template-columns: repeat(3, 1fr);
           gap: 12px;
         }
 
-        .feat {
-          padding: 12px 12px;
+        .feat,
+        .industry {
+          padding: 12px;
           border-radius: 14px;
           background: rgba(255, 255, 255, 0.62);
           border: 1px solid rgba(255, 255, 255, 0.24);
           backdrop-filter: blur(10px);
         }
 
-        .feat strong {
+        .feat strong,
+        .industry h4 {
           display: block;
           font-size: 13px;
           font-weight: 560;
           color: var(--blue);
-          margin-bottom: 4px;
+          margin: 0 0 6px;
         }
 
-        .feat p {
+        .feat p,
+        .industry p {
           margin: 0;
           font-size: 13px;
-          line-height: 1.38;
-          color: rgba(6, 19, 37, 0.72);
           font-weight: 460;
+          color: rgba(6, 19, 37, 0.72);
+          line-height: 1.35;
         }
 
         .industriesTitle {
@@ -647,39 +639,13 @@ export default function Page() {
           font-size: 13px;
         }
 
-        .industries {
-          display: grid;
-          grid-template-columns: repeat(3, 1fr);
-          gap: 12px;
-        }
-
-        .industry {
-          padding: 12px;
-          border-radius: 14px;
-          background: rgba(255, 255, 255, 0.62);
-          border: 1px solid rgba(255, 255, 255, 0.24);
-        }
-
-        .industry h4 {
-          margin: 0 0 6px;
-          font-size: 13px;
-          font-weight: 560;
-          color: var(--blue);
-        }
-
-        .industry p {
-          margin: 0;
-          font-size: 13px;
-          font-weight: 460;
-          color: rgba(6, 19, 37, 0.72);
-          line-height: 1.35;
-        }
-
-        /* ✅ footer bien visible */
         .footer {
           margin-top: 12px;
           display: flex;
           justify-content: center;
+          flex-direction: column;
+          align-items: center;
+          gap: 8px;
         }
 
         .footerPill {
@@ -706,6 +672,16 @@ export default function Page() {
           color: rgba(6, 19, 37, 0.72);
         }
 
+        .build {
+          font-size: 11px;
+          color: rgba(6, 19, 37, 0.55);
+          background: rgba(255, 255, 255, 0.55);
+          border: 1px solid rgba(255, 255, 255, 0.28);
+          padding: 6px 10px;
+          border-radius: 999px;
+          backdrop-filter: blur(10px);
+        }
+
         /* POPUP */
         .popup-overlay {
           display: none;
@@ -717,11 +693,9 @@ export default function Page() {
           justify-content: center;
           padding: 18px;
         }
-
         .popup-overlay.active {
           display: flex;
         }
-
         .popup {
           background: rgba(255, 255, 255, 0.94);
           width: 720px;
@@ -732,20 +706,17 @@ export default function Page() {
           border: 1px solid rgba(255, 255, 255, 0.35);
           backdrop-filter: blur(12px);
         }
-
         .popupHead {
           padding: 18px 18px 10px;
           border-bottom: 1px solid rgba(0, 0, 0, 0.08);
           background: linear-gradient(180deg, rgba(27, 115, 255, 0.10), rgba(255, 255, 255, 0.94));
         }
-
         .popupTitle {
           margin: 0;
           font-weight: 600;
           letter-spacing: -0.02em;
           font-size: 18px;
         }
-
         .popupSub {
           margin: 6px 0 0;
           color: rgba(6, 19, 37, 0.72);
@@ -753,17 +724,14 @@ export default function Page() {
           font-size: 12px;
           line-height: 1.4;
         }
-
         .popupBody {
           padding: 16px 18px 18px;
         }
-
         .row {
           display: grid;
           grid-template-columns: 1fr 1fr;
           gap: 12px;
         }
-
         label {
           display: block;
           font-size: 12px;
@@ -771,7 +739,6 @@ export default function Page() {
           color: rgba(6, 19, 37, 0.70);
           margin: 0 0 6px;
         }
-
         input,
         textarea {
           width: 100%;
@@ -784,32 +751,27 @@ export default function Page() {
           background: rgba(255, 255, 255, 0.92);
           color: #061325;
         }
-
         input:focus,
         textarea:focus {
           border-color: rgba(27, 115, 255, 0.55);
           box-shadow: 0 0 0 4px rgba(27, 115, 255, 0.12);
         }
-
         textarea {
           min-height: 110px;
           resize: vertical;
         }
-
         .actions {
           display: flex;
           gap: 10px;
           justify-content: flex-end;
           margin-top: 12px;
         }
-
         .err {
           margin-top: 10px;
           color: #b91c1c;
           font-weight: 560;
           font-size: 12px;
         }
-
         .successBox {
           display: flex;
           gap: 12px;
@@ -823,7 +785,6 @@ export default function Page() {
           font-size: 13px;
           line-height: 1.45;
         }
-
         .successIcon {
           width: 28px;
           height: 28px;
@@ -837,7 +798,6 @@ export default function Page() {
           flex: 0 0 auto;
           margin-top: 1px;
         }
-
         .popup-close {
           position: absolute;
           top: 10px;
@@ -850,7 +810,6 @@ export default function Page() {
           font-size: 22px;
           cursor: pointer;
         }
-
         .hp {
           position: absolute;
           left: -10000px;
@@ -860,12 +819,8 @@ export default function Page() {
           overflow: hidden;
         }
 
-        /* ✅ responsive mobile + pas de zoom iPhone */
+        /* ✅ Responsive : même look, juste empilé */
         @media (max-width: 1040px) {
-          body {
-            background-attachment: scroll;
-          }
-
           main {
             align-items: flex-start;
           }
@@ -888,11 +843,10 @@ export default function Page() {
             font-size: 16px;
           }
 
-          /* satellite plus petit mais toujours visible */
           body::after {
-            background-position: left 5% top 8%;
-            background-size: 320px auto;
-            opacity: 0.98;
+            background-position: left 4% top 10%;
+            background-size: 380px auto;
+            opacity: 0.96;
           }
         }
       `}</style>
@@ -902,7 +856,7 @@ export default function Page() {
           <div className="container">
             <nav>
               <div className="brand">
-                <img src="/assets/logo.png" alt="Enthalpy" />
+                <img src={`/assets/logo.png?v=${ASSET_VERSION}`} alt="Enthalpy" />
                 <div>
                   <strong>Enthalpy</strong>
                   <span>COLD &amp; CRITICAL MONITORING</span>
@@ -929,12 +883,11 @@ export default function Page() {
                     </h1>
 
                     <div className="lead">
-                      Enthalpy monitors temperature, humidity, vibration and CO₂
-                      in real time across warehouses, trucks and containers.
+                      Enthalpy monitors temperature, humidity, vibration and CO₂ in real time across warehouses, trucks and
+                      containers.
                       <br />
-                      When an incident happens, the data is timestamped and sealed
-                      as proof on blockchain — and the same blockchain record can
-                      trigger automatic payment (partners, insurance, claims, SLA).
+                      When an incident happens, the data is timestamped and sealed as proof on blockchain — and the same
+                      blockchain record can trigger automatic payment (partners, insurance, claims, SLA).
                     </div>
 
                     <div className="chips">
@@ -1070,6 +1023,7 @@ export default function Page() {
                     <strong>contact@enthalpy.site</strong>
                     <small>Tangier, Morocco</small>
                   </div>
+                  <div className="build">build: {ASSET_VERSION}</div>
                 </div>
               </section>
             </div>
