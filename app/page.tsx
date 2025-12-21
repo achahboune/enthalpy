@@ -5,6 +5,9 @@ import React, { useEffect, useMemo, useState } from "react"
 
 type Metric = "temp" | "humidity" | "vibration" | "co2"
 
+const BG_IMAGE = "/assets/bg-ocean-satellite-1920x1080.jpg" // ou "/assets/bg-ocean.jpg"
+const LOGO_IMAGE = "/assets/logo-transparent.png" // ou remplace ton logo.png par ce fichier
+
 const SERIES: Record<
   Metric,
   { label: string; unit: string; data: number[]; alert: string; yMin?: number; yMax?: number }
@@ -69,11 +72,13 @@ export default function Page() {
     setSubmitted(false)
     setErrorMsg("")
     setForm({ name: "", company: "", email: "", message: "", website: "" })
+    document.documentElement.style.overflow = "hidden"
   }
 
   function closePopup() {
     setPopupOpen(false)
     setErrorMsg("")
+    document.documentElement.style.overflow = ""
   }
 
   function onChange(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) {
@@ -126,46 +131,39 @@ export default function Page() {
     }
   }
 
+  // ESC close
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
-      if (e.key === "Escape") setPopupOpen(false)
+      if (e.key === "Escape") closePopup()
     }
     if (popupOpen) window.addEventListener("keydown", onKey)
     return () => window.removeEventListener("keydown", onKey)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [popupOpen])
 
   const chart = useMemo(() => {
     const s = SERIES[metric]
-    const W = 900
-    const H = 420
-    const padX = 26
-    const padY = 22
+    // ✅ plus grand, plus “site du monde”
+    const W = 760
+    const H = 360
+    const padX = 22
+    const padY = 18
 
     const min =
-      typeof s.yMin === "number"
-        ? s.yMin
-        : Math.min(...s.data) - (Math.max(...s.data) - Math.min(...s.data)) * 0.08
-
+      typeof s.yMin === "number" ? s.yMin : Math.min(...s.data) - (Math.max(...s.data) - Math.min(...s.data)) * 0.08
     const max =
-      typeof s.yMax === "number"
-        ? s.yMax
-        : Math.max(...s.data) + (Math.max(...s.data) - Math.min(...s.data)) * 0.08
+      typeof s.yMax === "number" ? s.yMax : Math.max(...s.data) + (Math.max(...s.data) - Math.min(...s.data)) * 0.08
 
-    const pts = s.data.map((v, i) => {
-      const x = padX + (i / (s.data.length - 1)) * (W - padX * 2)
-      const t = (v - min) / (max - min || 1)
-      const y = padY + (1 - clamp(t, 0, 1)) * (H - padY * 2)
-      return { x, y }
-    })
+    const points = s.data
+      .map((v, i) => {
+        const x = padX + (i / (s.data.length - 1)) * (W - padX * 2)
+        const t = (v - min) / (max - min || 1)
+        const y = padY + (1 - clamp(t, 0, 1)) * (H - padY * 2)
+        return `${x.toFixed(1)},${y.toFixed(1)}`
+      })
+      .join(" ")
 
-    const points = pts.map((p) => `${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(" ")
-    const area = [
-      `${padX},${H - padY}`,
-      ...pts.map((p) => `${p.x.toFixed(1)},${p.y.toFixed(1)}`),
-      `${W - padX},${H - padY}`,
-    ].join(" ")
-
-    return { W, H, padX, padY, min, max, points, area, s }
+    return { W, H, padX, padY, min, max, points, s }
   }, [metric])
 
   return (
@@ -173,11 +171,17 @@ export default function Page() {
       <style jsx global>{`
         :root {
           --blue: #1b73ff;
-          --cyan: #00c8ff;
+          --blue2: #00c8ff;
           --dark: #071628;
-          --glass: rgba(255, 255, 255, 0.42);
-          --shadow: 0 30px 90px rgba(0, 0, 0, 0.22);
-          --shadow2: 0 18px 60px rgba(0, 0, 0, 0.16);
+          --muted: rgba(7, 22, 40, 0.72);
+
+          --glass: rgba(255, 255, 255, 0.55);
+          --glassStrong: rgba(255, 255, 255, 0.7);
+          --stroke: rgba(255, 255, 255, 0.22);
+
+          --shadow: 0 28px 90px rgba(0, 0, 0, 0.28);
+          --shadow2: 0 18px 55px rgba(0, 0, 0, 0.18);
+
           --ok: #22c55e;
           --warn: #f59e0b;
         }
@@ -189,6 +193,7 @@ export default function Page() {
         html,
         body {
           height: 100%;
+          width: 100%;
         }
 
         body {
@@ -197,80 +202,92 @@ export default function Page() {
           -webkit-font-smoothing: antialiased;
           -moz-osx-font-smoothing: grayscale;
           color: var(--dark);
-          overflow-x: hidden;
-
-          /* ✅ BACKGROUND PLEIN ÉCRAN */
-          background: url("/assets/bg-ocean.jpg") center / cover no-repeat fixed;
+          overflow-x: hidden; /* ✅ pas de bouge/scroll horizontal */
+          background: #081425;
         }
 
-        /* voile global pro */
-        body::before {
-          content: "";
+        /* ✅ Background FIXE sans “background-attachment:fixed” (meilleur mobile) */
+        .bg {
           position: fixed;
           inset: 0;
-          background:
-            radial-gradient(1100px 620px at 14% 10%, rgba(255, 255, 255, 0.60), rgba(255, 255, 255, 0.08)),
-            radial-gradient(1400px 900px at 86% 16%, rgba(27, 115, 255, 0.16), rgba(27, 115, 255, 0.02)),
-            linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(0, 0, 0, 0.10));
-          pointer-events: none;
           z-index: 0;
+          background: url("${BG_IMAGE}") center / cover no-repeat;
+          transform: translateZ(0);
+        }
+        .bg::after {
+          content: "";
+          position: absolute;
+          inset: 0;
+          background: radial-gradient(900px 520px at 18% 12%, rgba(255, 255, 255, 0.55), rgba(255, 255, 255, 0.08)),
+            radial-gradient(1100px 700px at 85% 18%, rgba(27, 115, 255, 0.18), rgba(27, 115, 255, 0.03)),
+            linear-gradient(180deg, rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.25));
+          pointer-events: none;
         }
 
         .wrap {
           position: relative;
           z-index: 1;
-          min-height: 100svh;
+          min-height: 100vh;
           display: flex;
           flex-direction: column;
         }
 
-        /* ✅ “container” plein écran (pas petit au milieu) */
         .container {
-          width: min(1800px, calc(100vw - 64px)); /* 92vw environ */
+          width: min(1560px, calc(100% - 40px));
           margin: 0 auto;
         }
 
+        /* ✅ HEADER plus visible */
         header {
           position: sticky;
           top: 0;
           z-index: 50;
           padding: 14px 0;
-          background: rgba(255, 255, 255, 0.10);
-          backdrop-filter: blur(12px);
-          border-bottom: 1px solid rgba(255, 255, 255, 0.16);
+          background: rgba(255, 255, 255, 0.18);
+          backdrop-filter: blur(14px);
+          border-bottom: 1px solid rgba(255, 255, 255, 0.22);
         }
 
         nav {
           display: flex;
           align-items: center;
           justify-content: space-between;
-          gap: 16px;
+          gap: 14px;
         }
 
-        .brand {
+        /* ✅ zone brand plus lisible (comme sur ton image) */
+        .brandPill {
           display: flex;
           align-items: center;
           gap: 12px;
+          padding: 10px 12px;
+          border-radius: 16px;
+          background: rgba(255, 255, 255, 0.22);
+          border: 1px solid rgba(255, 255, 255, 0.22);
+          backdrop-filter: blur(12px);
         }
 
-        .brand img {
+        .brandLogo {
           width: 46px;
           height: 46px;
+          object-fit: contain;
+          filter: drop-shadow(0 10px 18px rgba(0, 0, 0, 0.25));
         }
 
-        .brand strong {
+        .brandText strong {
           display: block;
-          font-weight: 650;
+          font-weight: 800;
           font-size: 16px;
-          line-height: 1.1;
+          line-height: 1.05;
+          color: rgba(7, 22, 40, 0.92);
         }
 
-        .brand span {
+        .brandText span {
           display: block;
           font-size: 11px;
           letter-spacing: 0.18em;
           color: rgba(7, 22, 40, 0.62);
-          font-weight: 650;
+          font-weight: 750;
           margin-top: 3px;
           white-space: nowrap;
         }
@@ -278,78 +295,59 @@ export default function Page() {
         .btn {
           padding: 12px 18px;
           border-radius: 999px;
-          border: 1px solid rgba(255, 255, 255, 0.30);
-          background: rgba(255, 255, 255, 0.14);
+          border: 1px solid rgba(255, 255, 255, 0.34);
+          background: rgba(255, 255, 255, 0.18);
           color: #061325;
-          font-weight: 700;
+          font-weight: 750;
           cursor: pointer;
           backdrop-filter: blur(12px);
-          box-shadow: 0 12px 32px rgba(0, 0, 0, 0.14);
-          transition: transform 160ms ease, box-shadow 160ms ease, filter 160ms ease;
-        }
-
-        .btn:hover {
-          transform: translateY(-1px);
-          box-shadow: 0 18px 44px rgba(0, 0, 0, 0.18);
-          filter: saturate(1.05);
+          box-shadow: 0 10px 28px rgba(0, 0, 0, 0.16);
         }
 
         .btnPrimary {
           border: none;
-          background: linear-gradient(135deg, var(--blue), var(--cyan));
+          background: linear-gradient(135deg, var(--blue), var(--blue2));
           color: #fff;
-          box-shadow: 0 18px 46px rgba(27, 115, 255, 0.34);
+          box-shadow: 0 18px 48px rgba(27, 115, 255, 0.35);
         }
 
+        /* MAIN */
         main {
           flex: 1;
-          display: flex;
-          align-items: stretch;
+          padding: 28px 0 40px;
         }
 
-        /* ✅ zone principale = PLEIN ÉCRAN */
-        .stage {
-          min-height: calc(100svh - 78px);
-          padding: clamp(18px, 3vh, 44px) 0 22px;
-          display: flex;
-          flex-direction: column;
-          justify-content: center; /* remplit la page */
-          gap: 18px;
-        }
-
-        /* ✅ Grand “panel” pro comme les landing premium */
-        .panel {
-          width: 100%;
-          border-radius: 28px;
-          background: rgba(255, 255, 255, 0.16);
-          border: 1px solid rgba(255, 255, 255, 0.20);
-          backdrop-filter: blur(18px);
-          box-shadow: var(--shadow);
-          padding: clamp(18px, 2.2vw, 28px);
-        }
-
-        .layout {
-          display: grid;
-          grid-template-columns: 1.25fr 1fr;
-          gap: 26px;
-          align-items: stretch;
-
-          /* ✅ grosse hauteur */
-          min-height: min(820px, 78vh);
-        }
-
-        .glass {
+        /* ✅ GROS “PANEL” central (comme un vrai site) */
+        .shell {
           background: var(--glass);
+          border: 1px solid rgba(255, 255, 255, 0.22);
+          border-radius: 28px;
+          backdrop-filter: blur(16px);
+          box-shadow: var(--shadow);
+          padding: 26px;
+        }
+
+        .heroGrid {
+          display: grid;
+          grid-template-columns: 1.25fr 0.95fr;
+          gap: 22px;
+          align-items: stretch;
+        }
+
+        .card {
+          background: rgba(255, 255, 255, 0.6);
           border: 1px solid rgba(255, 255, 255, 0.24);
           border-radius: 22px;
-          backdrop-filter: blur(16px);
+          backdrop-filter: blur(14px);
           box-shadow: var(--shadow2);
         }
 
+        /* HERO */
         .heroCard {
           position: relative;
           overflow: hidden;
           padding: 28px 28px 22px;
+          min-height: 520px; /* ✅ grand */
         }
 
         .heroCard::before {
@@ -357,8 +355,8 @@ export default function Page() {
           position: absolute;
           inset: 0;
           background: url("/assets/hero-iot-proof.png") right center / cover no-repeat;
-          opacity: 0.40;
-          filter: saturate(1.08) contrast(1.06);
+          opacity: 0.42;
+          filter: saturate(1.05) contrast(1.05);
           pointer-events: none;
         }
 
@@ -369,7 +367,7 @@ export default function Page() {
           background: linear-gradient(
             90deg,
             rgba(255, 255, 255, 0.88) 0%,
-            rgba(255, 255, 255, 0.62) 52%,
+            rgba(255, 255, 255, 0.62) 55%,
             rgba(255, 255, 255, 0.16) 100%
           );
           pointer-events: none;
@@ -383,22 +381,21 @@ export default function Page() {
 
         h1 {
           margin: 0;
-          letter-spacing: -0.025em;
-          line-height: 1.03;
-          font-size: clamp(40px, 3.3vw, 58px);
-          font-weight: 620;
+          letter-spacing: -0.03em;
+          line-height: 1.04;
+          font-size: clamp(40px, 3.4vw, 64px); /* ✅ big & premium */
+          font-weight: 900;
         }
 
         .accent {
           color: var(--blue);
-          font-weight: 620;
         }
 
         .lead {
           margin-top: 14px;
-          font-size: 15.5px;
-          line-height: 1.65;
-          color: rgba(7, 22, 40, 0.78);
+          font-size: 15px;
+          line-height: 1.7;
+          color: rgba(7, 22, 40, 0.8);
           font-weight: 560;
           max-width: 760px;
         }
@@ -414,39 +411,39 @@ export default function Page() {
           display: inline-flex;
           align-items: center;
           gap: 8px;
-          padding: 10px 12px;
+          padding: 9px 11px;
           border-radius: 999px;
-          background: rgba(255, 255, 255, 0.62);
-          border: 1px solid rgba(255, 255, 255, 0.30);
-          font-size: 12.5px;
+          background: rgba(255, 255, 255, 0.78);
+          border: 1px solid rgba(255, 255, 255, 0.34);
+          font-size: 12px;
           font-weight: 800;
-          color: rgba(7, 22, 40, 0.82);
+          color: rgba(7, 22, 40, 0.84);
           backdrop-filter: blur(10px);
         }
 
         .dot {
           width: 9px;
           height: 9px;
-          border-radius: 999px;
+          border-radius: 99px;
           background: var(--blue);
-          box-shadow: 0 0 0 5px rgba(27, 115, 255, 0.16);
+          box-shadow: 0 0 0 6px rgba(27, 115, 255, 0.16);
         }
-
         .dotOk {
           background: var(--ok);
-          box-shadow: 0 0 0 5px rgba(34, 197, 94, 0.16);
+          box-shadow: 0 0 0 6px rgba(34, 197, 94, 0.16);
         }
-
         .dotWarn {
           background: var(--warn);
-          box-shadow: 0 0 0 5px rgba(245, 158, 11, 0.16);
+          box-shadow: 0 0 0 6px rgba(245, 158, 11, 0.16);
         }
 
+        /* CHART */
         .chartCard {
           padding: 18px 18px 16px;
           display: flex;
           flex-direction: column;
           gap: 12px;
+          min-height: 520px; /* ✅ grand */
         }
 
         .topRow {
@@ -459,18 +456,17 @@ export default function Page() {
         .cardTitle {
           font-weight: 900;
           font-size: 13px;
-          color: rgba(7, 22, 40, 0.86);
-          letter-spacing: 0.02em;
+          color: rgba(7, 22, 40, 0.9);
         }
 
         .live {
           display: inline-flex;
           align-items: center;
           gap: 8px;
-          padding: 7px 12px;
+          padding: 7px 11px;
           border-radius: 999px;
-          background: rgba(34, 197, 94, 0.14);
-          border: 1px solid rgba(34, 197, 94, 0.18);
+          background: rgba(34, 197, 94, 0.16);
+          border: 1px solid rgba(34, 197, 94, 0.2);
           font-size: 12px;
           font-weight: 850;
         }
@@ -478,9 +474,9 @@ export default function Page() {
         .liveDot {
           width: 8px;
           height: 8px;
-          border-radius: 999px;
+          border-radius: 99px;
           background: var(--ok);
-          box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.14);
+          box-shadow: 0 0 0 5px rgba(34, 197, 94, 0.14);
         }
 
         .tabs {
@@ -494,34 +490,25 @@ export default function Page() {
           padding: 10px 10px;
           font-size: 12px;
           font-weight: 850;
-          border: 1px solid rgba(255, 255, 255, 0.24);
-          background: rgba(255, 255, 255, 0.20);
+          border: 1px solid rgba(255, 255, 255, 0.26);
+          background: rgba(255, 255, 255, 0.35);
           cursor: pointer;
-          color: rgba(7, 22, 40, 0.86);
+          color: rgba(7, 22, 40, 0.9);
           backdrop-filter: blur(10px);
-          transition: background 140ms ease, transform 140ms ease;
-        }
-
-        .tab:hover {
-          transform: translateY(-1px);
-          background: rgba(255, 255, 255, 0.28);
         }
 
         .tabActive {
-          background: rgba(27, 115, 255, 0.18);
-          border-color: rgba(27, 115, 255, 0.25);
+          background: rgba(27, 115, 255, 0.2);
+          border-color: rgba(27, 115, 255, 0.28);
         }
 
         .chartWrap {
-          background: rgba(255, 255, 255, 0.56);
-          border: 1px solid rgba(255, 255, 255, 0.24);
-          border-radius: 18px;
+          background: rgba(255, 255, 255, 0.78);
+          border: 1px solid rgba(255, 255, 255, 0.26);
+          border-radius: 16px;
           padding: 12px 12px 10px;
           overflow: hidden;
           backdrop-filter: blur(10px);
-          flex: 1;
-          display: flex;
-          align-items: center;
         }
 
         .axisLabel {
@@ -531,28 +518,44 @@ export default function Page() {
         }
 
         .alert {
-          font-size: 12.5px;
+          font-size: 12px;
           font-weight: 900;
           color: rgba(122, 77, 0, 0.95);
-          background: rgba(245, 158, 11, 0.16);
-          border: 1px solid rgba(245, 158, 11, 0.20);
-          padding: 12px 14px;
+          background: rgba(245, 158, 11, 0.18);
+          border: 1px solid rgba(245, 158, 11, 0.22);
+          padding: 11px 12px;
           border-radius: 14px;
         }
 
-        .features {
+        /* ✅ BAS plus vif / plus visible */
+        .below {
           margin-top: 18px;
+          padding: 18px;
+          border-radius: 22px;
+          background: rgba(255, 255, 255, 0.42);
+          border: 1px solid rgba(255, 255, 255, 0.22);
+          backdrop-filter: blur(14px);
+        }
+
+        .sectionTitle {
+          text-align: center;
+          font-weight: 900;
+          letter-spacing: -0.02em;
+          margin: 0 0 12px;
+          color: rgba(7, 22, 40, 0.92);
+        }
+
+        .features {
           display: grid;
           grid-template-columns: repeat(3, 1fr);
-          gap: 14px;
+          gap: 12px;
         }
 
         .feat {
-          padding: 16px 16px;
-          border-radius: 18px;
-          background: rgba(255, 255, 255, 0.26);
-          border: 1px solid rgba(255, 255, 255, 0.18);
-          backdrop-filter: blur(12px);
+          padding: 14px 14px;
+          border-radius: 16px;
+          background: rgba(255, 255, 255, 0.7);
+          border: 1px solid rgba(255, 255, 255, 0.28);
           box-shadow: var(--shadow2);
         }
 
@@ -560,30 +563,56 @@ export default function Page() {
           display: block;
           font-size: 13px;
           font-weight: 950;
-          margin-bottom: 6px;
+          margin-bottom: 5px;
         }
 
         .feat p {
           margin: 0;
-          font-size: 12.5px;
-          line-height: 1.4;
-          color: rgba(7, 22, 40, 0.72);
+          font-size: 12px;
+          line-height: 1.35;
+          color: rgba(7, 22, 40, 0.78);
           font-weight: 650;
+        }
+
+        .industries {
+          margin-top: 14px;
+          display: grid;
+          grid-template-columns: repeat(3, 1fr);
+          gap: 12px;
+        }
+
+        .ind {
+          padding: 14px;
+          border-radius: 16px;
+          background: rgba(255, 255, 255, 0.7);
+          border: 1px solid rgba(255, 255, 255, 0.28);
+          box-shadow: var(--shadow2);
+        }
+        .ind strong {
+          display: block;
+          font-size: 13px;
+          font-weight: 950;
+          margin-bottom: 4px;
+        }
+        .ind span {
+          display: block;
+          font-size: 12px;
+          font-weight: 650;
+          color: rgba(7, 22, 40, 0.75);
         }
 
         .footer {
           margin-top: 12px;
           text-align: center;
-          color: rgba(255, 255, 255, 0.94);
           font-weight: 900;
-          text-shadow: 0 10px 26px rgba(0, 0, 0, 0.35);
+          color: rgba(255, 255, 255, 0.95);
+          text-shadow: 0 12px 26px rgba(0, 0, 0, 0.35);
         }
-
         .footer small {
           display: block;
           margin-top: 6px;
           font-weight: 850;
-          color: rgba(255, 255, 255, 0.84);
+          color: rgba(255, 255, 255, 0.88);
         }
 
         /* POPUP */
@@ -595,21 +624,20 @@ export default function Page() {
           z-index: 9999;
           align-items: center;
           justify-content: center;
-          padding: 18px;
+          padding: 16px;
         }
-
         .popup-overlay.active {
           display: flex;
         }
 
         .popup {
-          background: rgba(255, 255, 255, 0.92);
-          width: 720px;
-          max-width: 100%;
+          background: rgba(255, 255, 255, 0.94);
+          width: min(720px, 94vw); /* ✅ pas de zoom auto */
+          max-height: 86vh; /* ✅ pas de “grandissement” */
+          overflow: auto;
           border-radius: 18px;
-          overflow: hidden;
           position: relative;
-          box-shadow: 0 30px 90px rgba(0, 0, 0, 0.25);
+          box-shadow: 0 30px 90px rgba(0, 0, 0, 0.28);
           border: 1px solid rgba(255, 255, 255, 0.35);
           backdrop-filter: blur(12px);
         }
@@ -617,7 +645,7 @@ export default function Page() {
         .popupHead {
           padding: 18px 18px 10px;
           border-bottom: 1px solid rgba(0, 0, 0, 0.08);
-          background: linear-gradient(180deg, rgba(27, 115, 255, 0.12), rgba(255, 255, 255, 0.92));
+          background: linear-gradient(180deg, rgba(27, 115, 255, 0.12), rgba(255, 255, 255, 0.94));
         }
 
         .popupTitle {
@@ -630,7 +658,7 @@ export default function Page() {
         .popupSub {
           margin: 6px 0 0;
           color: rgba(7, 22, 40, 0.78);
-          font-weight: 700;
+          font-weight: 650;
           font-size: 12px;
           line-height: 1.4;
         }
@@ -653,16 +681,17 @@ export default function Page() {
           margin: 0 0 6px;
         }
 
+        /* ✅ IMPORTANT: 16px minimum sinon iPhone zoom */
         input,
         textarea {
           width: 100%;
           border-radius: 12px;
           border: 1px solid rgba(0, 0, 0, 0.16);
           padding: 12px 12px;
-          font-size: 13px;
-          font-weight: 800;
+          font-size: 16px; /* ✅ anti-zoom iOS */
+          font-weight: 700;
           outline: none;
-          background: rgba(255, 255, 255, 0.9);
+          background: rgba(255, 255, 255, 0.95);
           color: #061325;
         }
 
@@ -673,7 +702,7 @@ export default function Page() {
         }
 
         textarea {
-          min-height: 110px;
+          min-height: 120px;
           resize: vertical;
         }
 
@@ -687,7 +716,7 @@ export default function Page() {
         .err {
           margin-top: 10px;
           color: #b91c1c;
-          font-weight: 950;
+          font-weight: 900;
           font-size: 12px;
         }
 
@@ -697,8 +726,8 @@ export default function Page() {
           align-items: flex-start;
           padding: 14px;
           border-radius: 14px;
-          background: rgba(34, 197, 94, 0.12);
-          border: 1px solid rgba(34, 197, 94, 0.2);
+          background: rgba(34, 197, 94, 0.14);
+          border: 1px solid rgba(34, 197, 94, 0.22);
           color: #061325;
           font-weight: 800;
           font-size: 13px;
@@ -711,8 +740,8 @@ export default function Page() {
           border-radius: 999px;
           display: grid;
           place-items: center;
-          background: rgba(34, 197, 94, 0.18);
-          border: 1px solid rgba(34, 197, 94, 0.28);
+          background: rgba(34, 197, 94, 0.2);
+          border: 1px solid rgba(34, 197, 94, 0.3);
           font-weight: 950;
           color: #15803d;
           flex: 0 0 auto;
@@ -727,7 +756,7 @@ export default function Page() {
           height: 40px;
           border-radius: 999px;
           border: none;
-          background: rgba(255, 255, 255, 0.92);
+          background: rgba(255, 255, 255, 0.95);
           font-size: 22px;
           cursor: pointer;
           box-shadow: 0 10px 24px rgba(0, 0, 0, 0.2);
@@ -742,42 +771,41 @@ export default function Page() {
           overflow: hidden;
         }
 
-        @media (max-width: 1120px) {
-          .container {
-            width: calc(100vw - 28px);
-          }
-          .layout {
+        /* ✅ RESPONSIVE */
+        @media (max-width: 980px) {
+          .heroGrid {
             grid-template-columns: 1fr;
+          }
+          .heroCard,
+          .chartCard {
             min-height: auto;
           }
-          header {
-            position: relative;
-          }
-          body {
-            background-attachment: scroll;
+          .features,
+          .industries {
+            grid-template-columns: 1fr;
           }
           .row {
             grid-template-columns: 1fr;
           }
-          .features {
-            grid-template-columns: 1fr;
+          h1 {
+            font-size: clamp(34px, 8vw, 48px);
           }
-          .heroCard::before {
-            opacity: 0.26;
-          }
-          .heroCard::after {
-            background: linear-gradient(180deg, rgba(255, 255, 255, 0.88), rgba(255, 255, 255, 0.60));
+          .shell {
+            padding: 18px;
           }
         }
       `}</style>
 
+      <div className="bg" aria-hidden="true" />
+
       <div className="wrap">
+        {/* HEADER */}
         <header>
           <div className="container">
             <nav>
-              <div className="brand">
-                <img src="/assets/logo.png" alt="Enthalpy" />
-                <div>
+              <div className="brandPill">
+                <img className="brandLogo" src={LOGO_IMAGE} alt="Enthalpy" />
+                <div className="brandText">
                   <strong>Enthalpy</strong>
                   <span>COLD &amp; CRITICAL MONITORING</span>
                 </div>
@@ -790,115 +818,110 @@ export default function Page() {
           </div>
         </header>
 
+        {/* MAIN */}
         <main>
           <div className="container">
-            <div className="stage">
-              <div className="panel">
-                <div className="layout">
-                  {/* HERO */}
-                  <section className="glass heroCard">
-                    <div className="heroInner">
-                      <h1>
-                        Smart IoT sensors for critical goods.
-                        <br />
-                        <span className="accent">Blockchain proof &amp; payment when something goes wrong.</span>
-                      </h1>
+            <div className="shell">
+              <div className="heroGrid">
+                {/* LEFT: HERO */}
+                <section className="card heroCard">
+                  <div className="heroInner">
+                    <h1>
+                      Smart IoT sensors for critical goods.
+                      <br />
+                      <span className="accent">Blockchain proof &amp; payment when something goes wrong.</span>
+                    </h1>
 
-                      <div className="lead">
-                        Enthalpy monitors <b>temperature</b>, <b>humidity</b>, <b>vibration</b> and <b>CO₂</b> in real time
-                        across <b>warehouses</b>, <b>trucks</b> and <b>containers</b>.
-                        <br />
-                        When an incident happens, the data is <b>timestamped</b> and sealed as <b>proof on blockchain</b> —
-                        and the same blockchain record can trigger <b>automatic payment</b> (insurance, claims, SLA).
-                      </div>
-
-                      <div className="chips">
-                        <span className="chip">
-                          <span className="dot" />
-                          Temperature • Humidity • CO₂ • Vibration
-                        </span>
-                        <span className="chip">
-                          <span className="dot dotOk" />
-                          Proof (blockchain-sealed)
-                        </span>
-                        <span className="chip">
-                          <span className="dot dotWarn" />
-                          Payment (blockchain-triggered)
-                        </span>
-                      </div>
-                    </div>
-                  </section>
-
-                  {/* CHART */}
-                  <section className="glass chartCard" aria-label="Analytics">
-                    <div className="topRow">
-                      <div className="cardTitle">Analytics</div>
-                      <div className="live">
-                        <span className="liveDot" />
-                        Live
-                      </div>
+                    <div className="lead">
+                      Enthalpy monitors <b>temperature</b>, <b>humidity</b>, <b>vibration</b> and <b>CO₂</b> in real time across{" "}
+                      <b>warehouses</b>, <b>trucks</b> and <b>containers</b>.
+                      <br />
+                      When an incident happens, the data is <b>timestamped</b> and sealed as <b>proof on blockchain</b> — and the same
+                      blockchain record can trigger <b>automatic payment</b> (partners, insurance, claims, SLA).
                     </div>
 
-                    <div className="tabs">
-                      {(["temp", "humidity", "vibration", "co2"] as Metric[]).map((m) => (
-                        <button
-                          key={m}
-                          className={`tab ${metric === m ? "tabActive" : ""}`}
-                          onClick={() => setMetric(m)}
-                          type="button"
-                        >
-                          {SERIES[m].label}
-                        </button>
-                      ))}
+                    <div className="chips">
+                      <span className="chip">
+                        <span className="dot" />
+                        Temperature • Humidity • CO₂ • Vibration
+                      </span>
+                      <span className="chip">
+                        <span className="dot dotOk" />
+                        Proof (blockchain-sealed)
+                      </span>
+                      <span className="chip">
+                        <span className="dot dotWarn" />
+                        Payment (blockchain-triggered)
+                      </span>
                     </div>
+                  </div>
+                </section>
 
-                    <div className="chartWrap">
-                      <svg width="100%" viewBox={`0 0 ${chart.W} ${chart.H}`} role="img" aria-label="Sensor chart">
-                        <defs>
-                          <linearGradient id="fillLine" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="0%" stopColor="rgba(27,115,255,0.26)" />
-                            <stop offset="100%" stopColor="rgba(27,115,255,0.02)" />
-                          </linearGradient>
-                        </defs>
-
-                        {Array.from({ length: 5 }).map((_, i) => {
-                          const y = chart.padY + (i / 4) * (chart.H - chart.padY * 2)
-                          return (
-                            <line
-                              key={i}
-                              x1={chart.padX}
-                              y1={y}
-                              x2={chart.W - chart.padX}
-                              y2={y}
-                              stroke="rgba(7, 22, 40, 0.10)"
-                              strokeWidth="1"
-                            />
-                          )
-                        })}
-
-                        <text x={chart.padX} y={16} className="axisLabel">
-                          {chart.max.toFixed(metric === "vibration" ? 2 : 0)} {chart.s.unit}
-                        </text>
-                        <text x={chart.padX} y={chart.H - 6} className="axisLabel">
-                          {chart.min.toFixed(metric === "vibration" ? 2 : 0)} {chart.s.unit}
-                        </text>
-
-                        <polygon points={chart.area} fill="url(#fillLine)" />
-
-                        <polyline
-                          points={chart.points}
-                          fill="none"
-                          stroke="rgba(27,115,255,0.95)"
-                          strokeWidth="4.0"
-                          strokeLinejoin="round"
-                          strokeLinecap="round"
-                        />
-                      </svg>
+                {/* RIGHT: CHART */}
+                <section className="card chartCard" aria-label="Analytics">
+                  <div className="topRow">
+                    <div className="cardTitle">Analytics</div>
+                    <div className="live">
+                      <span className="liveDot" />
+                      Live
                     </div>
+                  </div>
 
-                    <div className="alert">{chart.s.alert}</div>
-                  </section>
-                </div>
+                  <div className="tabs">
+                    {(["temp", "humidity", "vibration", "co2"] as Metric[]).map((m) => (
+                      <button
+                        key={m}
+                        className={`tab ${metric === m ? "tabActive" : ""}`}
+                        onClick={() => setMetric(m)}
+                        type="button"
+                      >
+                        {SERIES[m].label}
+                      </button>
+                    ))}
+                  </div>
+
+                  <div className="chartWrap">
+                    <svg width="100%" viewBox={`0 0 ${chart.W} ${chart.H}`} role="img" aria-label="Sensor chart">
+                      {Array.from({ length: 5 }).map((_, i) => {
+                        const y = chart.padY + (i / 4) * (chart.H - chart.padY * 2)
+                        return (
+                          <line
+                            key={i}
+                            x1={chart.padX}
+                            y1={y}
+                            x2={chart.W - chart.padX}
+                            y2={y}
+                            stroke="rgba(7, 22, 40, 0.10)"
+                            strokeWidth="1"
+                          />
+                        )
+                      })}
+
+                      <text x={chart.padX} y={15} className="axisLabel">
+                        {chart.max.toFixed(metric === "vibration" ? 2 : 0)} {chart.s.unit}
+                      </text>
+                      <text x={chart.padX} y={chart.H - 5} className="axisLabel">
+                        {chart.min.toFixed(metric === "vibration" ? 2 : 0)} {chart.s.unit}
+                      </text>
+
+                      <polyline
+                        points={chart.points}
+                        fill="none"
+                        stroke="rgba(27,115,255,0.95)"
+                        strokeWidth="4"
+                        strokeLinejoin="round"
+                        strokeLinecap="round"
+                      />
+                    </svg>
+                  </div>
+
+                  <div className="alert">{chart.s.alert}</div>
+                </section>
+              </div>
+
+              {/* BELOW (plus visible) */}
+              <div className="below">
+                <h3 className="sectionTitle">From sensors to proof</h3>
 
                 <div className="features">
                   <div className="feat">
@@ -912,6 +935,25 @@ export default function Page() {
                   <div className="feat">
                     <strong>Blockchain</strong>
                     <p>Proof + payment flows secured via blockchain records.</p>
+                  </div>
+                </div>
+
+                <h3 className="sectionTitle" style={{ marginTop: 14 }}>
+                  Industries where a few degrees cost millions
+                </h3>
+
+                <div className="industries">
+                  <div className="ind">
+                    <strong>Pharma &amp; Biotech</strong>
+                    <span>Audit-ready traceability &amp; compliance proof.</span>
+                  </div>
+                  <div className="ind">
+                    <strong>Food &amp; Frozen</strong>
+                    <span>Prevent cold-chain failures &amp; claims.</span>
+                  </div>
+                  <div className="ind">
+                    <strong>Logistics &amp; 3PL</strong>
+                    <span>SLA evidence + partner payments automation.</span>
                   </div>
                 </div>
 
@@ -952,6 +994,7 @@ export default function Page() {
                 </div>
               ) : (
                 <form onSubmit={submitForm}>
+                  {/* Honeypot */}
                   <div className="hp">
                     <label>
                       Website
