@@ -1,1116 +1,507 @@
-/* app/page.tsx */
 "use client"
 
 import React, { useEffect, useMemo, useState } from "react"
+import { 
+  Activity, 
+  Thermometer, 
+  Wind, 
+  Droplets,
+  CheckCircle2, 
+  AlertTriangle, 
+  Menu,
+  X,
+  Send,
+  Mail,
+  ArrowRight,
+  ShieldCheck,
+  Zap,
+  Box,
+  Globe,
+  Truck,
+  Leaf,
+  FlaskConical,
+  Utensils
+} from "lucide-react"
+
+// --- TYPES & DATA ---
 
 type Metric = "temp" | "humidity" | "vibration" | "co2"
 
-// ✅ change cette valeur à chaque deploy si besoin (force refresh sur mobile/PC)
-const ASSET_VERSION = "20251221-2"
-
-const SERIES: Record<
-  Metric,
-  { label: string; unit: string; data: number[]; alert: string; yMin?: number; yMax?: number }
-> = {
+const SERIES: Record<Metric, { label: string; unit: string; data: number[]; alert: string; yMin: number; yMax: number; icon: React.ReactNode }> = {
   temp: {
-    label: "Temp",
+    label: "Temperature",
     unit: "°C",
     data: [4.2, 4.1, 4.3, 4.8, 5.4, 5.9, 6.1, 6.0, 5.7, 5.4, 5.2],
-    alert: "Temperature excursion detected",
+    alert: "Excursion detected",
     yMin: 4,
     yMax: 6.5,
+    icon: <Thermometer className="w-5 h-5" />,
   },
   humidity: {
     label: "Humidity",
     unit: "%",
     data: [58, 57, 58, 60, 62, 66, 68, 67, 65, 63, 62],
-    alert: "Humidity drift detected",
+    alert: "Drift detected",
     yMin: 50,
     yMax: 75,
+    icon: <Droplets className="w-5 h-5" />,
   },
   vibration: {
     label: "Vibration",
     unit: "g",
     data: [0.12, 0.11, 0.13, 0.18, 0.22, 0.31, 0.28, 0.24, 0.21, 0.19, 0.17],
-    alert: "Abnormal vibration detected",
+    alert: "Abnormal shock",
     yMin: 0.05,
     yMax: 0.35,
+    icon: <Activity className="w-5 h-5" />,
   },
   co2: {
-    label: "CO₂",
+    label: "CO₂ Level",
     unit: "ppm",
     data: [410, 415, 420, 435, 460, 520, 610, 690, 720, 710, 680],
-    alert: "CO₂ level rising",
+    alert: "Rising levels",
     yMin: 380,
     yMax: 760,
+    icon: <Wind className="w-5 h-5" />,
   },
 }
 
-const STATUS: Record<Metric, "ok" | "warn" | "risk"> = {
-  temp: "risk",
-  humidity: "warn",
-  vibration: "warn",
-  co2: "ok",
-}
+const STATUS_MAP = {
+  temp: "critical",
+  humidity: "warning",
+  vibration: "warning",
+  co2: "normal",
+} as const
 
-const STATUS_LABEL: Record<"ok" | "warn" | "risk", string> = {
-  ok: "Normal range",
-  warn: "Drift detected",
-  risk: "Excursion detected",
-}
-
-const STATUS_STROKE: Record<"ok" | "warn" | "risk", string> = {
-  ok: "rgba(34,197,94,0.95)",
-  warn: "rgba(245,158,11,0.95)",
-  risk: "rgba(239,68,68,0.95)",
-}
-
-function clamp(n: number, a: number, b: number) {
-  return Math.max(a, Math.min(b, n))
-}
+// --- COMPONENTS ---
 
 export default function Page() {
-  // POPUP + FORM
+  const [metric, setMetric] = useState<Metric>("temp")
+  const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [popupOpen, setPopupOpen] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const [submitted, setSubmitted] = useState(false)
+  
+  // Form State
+  const [form, setForm] = useState({ name: "", company: "", email: "", message: "", website: "" })
   const [errorMsg, setErrorMsg] = useState("")
-  const [form, setForm] = useState({
-    name: "",
-    company: "",
-    email: "",
-    message: "",
-    website: "", // honeypot
-  })
 
-  // DASHBOARD
-  const [metric, setMetric] = useState<Metric>("temp")
-  const status = STATUS[metric]
-
-  function openPopup() {
-    setPopupOpen(true)
-    setSubmitted(false)
-    setErrorMsg("")
-    setForm({ name: "", company: "", email: "", message: "", website: "" })
+  // Handlers
+  const toggleMenu = () => setIsMenuOpen(!isMenuOpen)
+  const openPopup = () => { setPopupOpen(true); setSubmitted(false); }
+  const closePopup = () => setPopupOpen(false)
+  
+  const handleFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    setForm({ ...form, [e.target.name]: e.target.value })
   }
 
-  function closePopup() {
-    setPopupOpen(false)
-    setErrorMsg("")
-  }
-
-  function onChange(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) {
-    const { name, value } = e.target
-    setForm((p) => ({ ...p, [name]: value }))
-  }
-
-  async function submitForm(e: React.FormEvent) {
+  const submitForm = async (e: React.FormEvent) => {
     e.preventDefault()
-    setErrorMsg("")
-
-    if (form.website.trim().length > 0) return // honeypot
-
-    if (!form.company.trim()) return setErrorMsg("Company name is required.")
-    if (!form.email.trim()) return setErrorMsg("Work email is required.")
-    if (!/^\S+@\S+\.\S+$/.test(form.email.trim())) return setErrorMsg("Please enter a valid email.")
-    if (!form.message.trim()) return setErrorMsg("Message is required.")
-
+    if (form.website) return 
     setSubmitting(true)
     try {
       const res = await fetch("/api/pilot-access", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name: form.name.trim(),
-          company: form.company.trim(),
-          email: form.email.trim(),
-          message: form.message.trim(),
-          website: form.website.trim(),
-        }),
+        body: JSON.stringify(form)
       })
-
-      let data: any = {}
-      try {
-        data = await res.json()
-      } catch {
-        data = {}
-      }
-
-      if (!res.ok) {
-        setErrorMsg(data?.error || `Something went wrong. (${res.status})`)
-        return
-      }
-
-      setSubmitted(true)
+      if (res.ok) setSubmitted(true)
+      else setErrorMsg("Something went wrong. Please try again.")
     } catch {
-      setErrorMsg("Network error. Please try again.")
+      setErrorMsg("Network error.")
     } finally {
       setSubmitting(false)
     }
   }
 
-  // ESC close
-  useEffect(() => {
-    function onKey(e: KeyboardEvent) {
-      if (e.key === "Escape") setPopupOpen(false)
-    }
-    if (popupOpen) window.addEventListener("keydown", onKey)
-    return () => window.removeEventListener("keydown", onKey)
-  }, [popupOpen])
+  // --- RENDER HELPERS ---
 
-  const chart = useMemo(() => {
-    const s = SERIES[metric]
-    const W = 620
-    const H = 300
-    const padX = 18
-    const padY = 16
+  const currentSeries = SERIES[metric]
+  const currentStatus = STATUS_MAP[metric]
+  
+  // Status Styles
+  const statusColors = {
+    normal: "text-emerald-400 border-emerald-500/30 bg-emerald-500/10",
+    warning: "text-amber-400 border-amber-500/30 bg-amber-500/10",
+    critical: "text-rose-400 border-rose-500/30 bg-rose-500/10",
+  }
 
-    const min =
-      typeof s.yMin === "number"
-        ? s.yMin
-        : Math.min(...s.data) - (Math.max(...s.data) - Math.min(...s.data)) * 0.08
-    const max =
-      typeof s.yMax === "number"
-        ? s.yMax
-        : Math.max(...s.data) + (Math.max(...s.data) - Math.min(...s.data)) * 0.08
+  // Chart Logic (Simplified for pure UI focus)
+  const Chart = () => {
+    const W = 500, H = 200
+    const points = currentSeries.data.map((val, i) => {
+      const x = (i / (currentSeries.data.length - 1)) * W
+      const norm = (val - currentSeries.yMin) / (currentSeries.yMax - currentSeries.yMin)
+      const y = H - (norm * H) // invert Y
+      return `${x},${Math.max(10, Math.min(H-10, y))}`
+    }).join(" ")
 
-    const points = s.data
-      .map((v, i) => {
-        const x = padX + (i / (s.data.length - 1)) * (W - padX * 2)
-        const t = (v - min) / (max - min || 1)
-        const y = padY + (1 - clamp(t, 0, 1)) * (H - padY * 2)
-        return `${x.toFixed(1)},${y.toFixed(1)}`
-      })
-      .join(" ")
+    return (
+      <svg viewBox={`0 0 ${W} ${H}`} className="w-full h-full overflow-visible">
+        {/* Gradients */}
+        <defs>
+          <linearGradient id="lineGrad" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stopColor={currentStatus === 'critical' ? '#f43f5e' : currentStatus === 'warning' ? '#fbbf24' : '#34d399'} stopOpacity="0.8"/>
+            <stop offset="100%" stopColor={currentStatus === 'critical' ? '#f43f5e' : currentStatus === 'warning' ? '#fbbf24' : '#34d399'} stopOpacity="1"/>
+          </linearGradient>
+          <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+            <feGaussianBlur stdDeviation="5" result="blur"/>
+            <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+          </filter>
+        </defs>
+        
+        {/* Grid Lines */}
+        <line x1="0" y1={H} x2={W} y2={H} stroke="white" strokeOpacity="0.1" />
+        <line x1="0" y1={0} x2={W} y2={0} stroke="white" strokeOpacity="0.1" />
+        <line x1="0" y1={H/2} x2={W} y2={H/2} stroke="white" strokeOpacity="0.1" strokeDasharray="5,5" />
 
-    return { W, H, padX, padY, min, max, points, s }
-  }, [metric])
+        {/* The Line */}
+        <polyline 
+          points={points} 
+          fill="none" 
+          stroke="url(#lineGrad)" 
+          strokeWidth="4" 
+          strokeLinecap="round" 
+          strokeLinejoin="round"
+          filter="url(#glow)"
+        />
+        
+        {/* Pulsing Dot at End */}
+        {(() => {
+           const arr = points.split(' ')
+           const [lx, ly] = arr[arr.length-1].split(',')
+           return <circle cx={lx} cy={ly} r="6" fill="white" className="animate-pulse" />
+        })()}
+      </svg>
+    )
+  }
 
   return (
-    <>
-      <style jsx global>{`
-        :root {
-          --blue: #1b73ff;
-          --dark: #061325;
-          --muted: rgba(6, 19, 37, 0.74);
-
-          --glass: rgba(255, 255, 255, 0.72);
-          --glassStrong: rgba(255, 255, 255, 0.58);
-          --stroke: rgba(255, 255, 255, 0.20);
-
-          --ok: #22c55e;
-          --warn: #f59e0b;
-          --risk: #ef4444;
-        }
-
-        * {
-          box-sizing: border-box;
-        }
-
-        html,
-        body {
-          height: 100%;
-        }
-
-        body {
-          margin: 0;
-          font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
-          -webkit-font-smoothing: antialiased;
-          -moz-osx-font-smoothing: grayscale;
-          color: var(--dark);
-          overflow-x: hidden;
-
-          /* ✅ versionné (force refresh) */
-          background: url("/assets/bg-ocean.jpg?v=20251221") center / cover no-repeat fixed;
-          position: relative;
-        }
-
-        body::before {
-          content: "";
-          position: fixed;
-          inset: 0;
-          background: radial-gradient(900px 520px at 18% 12%, rgba(255, 255, 255, 0.30), rgba(255, 255, 255, 0.08)),
-            radial-gradient(1000px 650px at 82% 16%, rgba(27, 115, 255, 0.12), rgba(27, 115, 255, 0.02)),
-            linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(0, 0, 0, 0.22));
-          pointer-events: none;
-          z-index: 0;
-        }
-
-        body::after {
-          content: "";
-          position: fixed;
-          inset: 0;
-          background: url("/assets/hero-iot-proof.png?v=20251221") right center / cover no-repeat;
-          opacity: 0.96;
-          filter: drop-shadow(0 18px 40px rgba(0, 0, 0, 0.22));
-          pointer-events: none;
-          z-index: 0;
-        }
-
-        .wrap {
-          position: relative;
-          z-index: 1;
-          min-height: 100svh;
-          display: flex;
-          flex-direction: column;
-        }
-
-        .container {
-          width: min(1240px, calc(100% - 40px));
-          margin: 0 auto;
-        }
-
-        header {
-          position: sticky;
-          top: 0;
-          z-index: 20;
-          padding: 14px 0;
-          background: rgba(255, 255, 255, 0.08);
-          backdrop-filter: blur(10px);
-          border-bottom: 1px solid rgba(255, 255, 255, 0.14);
-        }
-
-        nav {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          gap: 16px;
-        }
-
-        .brand {
-          display: inline-flex;
-          align-items: center;
-          gap: 10px;
-          padding: 8px 10px;
-          border-radius: 14px;
-          background: rgba(255, 255, 255, 0.10);
-          border: 1px solid rgba(255, 255, 255, 0.16);
-          backdrop-filter: blur(10px);
-        }
-
-        .brand img {
-          width: 36px;
-          height: 36px;
-          object-fit: contain;
-        }
-
-        .brand strong {
-          display: block;
-          font-weight: 560;
-          font-size: 14px;
-          line-height: 1.1;
-        }
-
-        .brand span {
-          display: block;
-          font-size: 10px;
-          letter-spacing: 0.18em;
-          color: rgba(6, 19, 37, 0.56);
-          font-weight: 520;
-          margin-top: 3px;
-          white-space: nowrap;
-        }
-
-        .btn {
-          padding: 11px 16px;
-          border-radius: 999px;
-          border: 1px solid rgba(255, 255, 255, 0.30);
-          background: rgba(255, 255, 255, 0.10);
-          color: #061325;
-          font-weight: 560;
-          cursor: pointer;
-          backdrop-filter: blur(12px);
-        }
-
-        .btnPrimary {
-          border: none;
-          background: linear-gradient(135deg, #1b73ff, #00c8ff);
-          color: #fff;
-          box-shadow: 0 14px 30px rgba(27, 115, 255, 0.26);
-        }
-
-        main {
-          flex: 1;
-          display: flex;
-          align-items: center;
-        }
-
-        .stage {
-          width: 100%;
-          padding: 22px 0 28px;
-        }
-
-        .layout {
-          display: grid;
-          grid-template-columns: 1.12fr 0.88fr;
-          gap: 18px;
-          align-items: stretch;
-        }
-
-        .glass {
-          background: var(--glass);
-          border: 1px solid rgba(255, 255, 255, 0.20);
-          border-radius: 18px;
-          backdrop-filter: blur(14px);
-        }
-
-        .heroCard {
-          position: relative;
-          overflow: hidden;
-          padding: 20px;
-        }
-
-        .heroCard::before {
-          content: "";
-          position: absolute;
-          inset: 0;
-          background: url("/assets/hero-iot-proof.png?v=${ASSET_VERSION}") right center / cover no-repeat;
-          opacity: 0.62;
-          filter: saturate(1.05) contrast(1.05);
-          pointer-events: none;
-        }
-
-        .heroCard::after {
-          content: "";
-          position: absolute;
-          inset: 0;
-          background: linear-gradient(
-            90deg,
-            rgba(255, 255, 255, 0.46) 0%,
-            rgba(255, 255, 255, 0.24) 56%,
-            rgba(255, 255, 255, 0.10) 100%
-          );
-          pointer-events: none;
-        }
-
-        .heroInner {
-          position: relative;
-          z-index: 2;
-          max-width: 760px;
-        }
-
-        h1 {
-          margin: 0;
-          letter-spacing: -0.02em;
-          line-height: 1.06;
-          font-size: clamp(30px, 3.1vw, 48px);
-          font-weight: 560;
-        }
-
-        .accent {
-          color: var(--blue);
-          font-weight: 560;
-        }
-
-        /* ✅ TRANSPARENT + lisible */
-        .lead {
-          position: relative;
-          margin-top: 12px;
-          max-width: 720px;
-          padding: 14px 16px;
-          border-radius: 14px;
-
-          background: rgba(255, 255, 255, 0.14);
-          border: 1px solid rgba(255, 255, 255, 0.28);
-          backdrop-filter: blur(18px) saturate(160%);
-          -webkit-backdrop-filter: blur(18px) saturate(160%);
-
-          color: rgba(6, 12, 24, 0.95);
-          font-weight: 650;
-          font-size: 18px;
-          line-height: 1.7;
-
-          box-shadow: 0 10px 30px rgba(0, 0, 0, 0.10);
-          text-shadow: 0 1px 0 rgba(255, 255, 255, 0.55), 0 10px 22px rgba(0, 0, 0, 0.22);
-        }
-
-        .lead::before {
-          content: "";
-          position: absolute;
-          inset: 0;
-          border-radius: inherit;
-          pointer-events: none;
-          background: linear-gradient(180deg, rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0.06));
-        }
-
-        b,
-        strong {
-          font-weight: 560;
-        }
-
-        .chips {
-          margin-top: 14px;
-          display: flex;
-          flex-wrap: wrap;
-          gap: 10px;
-        }
-
-        .chip {
-          display: inline-flex;
-          align-items: center;
-          gap: 8px;
-          padding: 8px 10px;
-          border-radius: 999px;
-          background: rgba(255, 255, 255, 0.48);
-          border: 1px solid rgba(255, 255, 255, 0.24);
-          font-size: 12px;
-          font-weight: 520;
-          color: rgba(6, 19, 37, 0.78);
-          backdrop-filter: blur(10px);
-        }
-
-        .dot {
-          width: 9px;
-          height: 9px;
-          border-radius: 99px;
-          background: var(--blue);
-          box-shadow: 0 0 0 5px rgba(27, 115, 255, 0.12);
-        }
-
-        .dot-ok {
-          background: var(--ok);
-          box-shadow: 0 0 0 5px rgba(34, 197, 94, 0.12);
-        }
-        .dot-warn {
-          background: var(--warn);
-          box-shadow: 0 0 0 5px rgba(245, 158, 11, 0.12);
-        }
-        .dot-risk {
-          background: var(--risk);
-          box-shadow: 0 0 0 5px rgba(239, 68, 68, 0.12);
-        }
-
-        .chartCard {
-          padding: 16px;
-          display: flex;
-          flex-direction: column;
-          gap: 10px;
-          background: rgba(255, 255, 255, 0.42);
-        }
-
-        .topRow {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          gap: 10px;
-        }
-
-        .cardTitle {
-          font-weight: 560;
-          font-size: 13px;
-          color: rgba(6, 19, 37, 0.78);
-        }
-
-        .live {
-          display: inline-flex;
-          align-items: center;
-          gap: 8px;
-          padding: 6px 10px;
-          border-radius: 999px;
-          background: rgba(34, 197, 94, 0.12);
-          border: 1px solid rgba(34, 197, 94, 0.18);
-          font-size: 12px;
-          font-weight: 520;
-          color: rgba(6, 19, 37, 0.70);
-        }
-
-        .liveDot {
-          width: 8px;
-          height: 8px;
-          border-radius: 99px;
-          background: var(--ok);
-          box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.12);
-        }
-
-        .tabs {
-          display: grid;
-          grid-template-columns: repeat(4, 1fr);
-          gap: 10px;
-        }
-
-        .tab {
-          border-radius: 999px;
-          padding: 9px 10px;
-          font-size: 12px;
-          font-weight: 520;
-          border: 1px solid rgba(255, 255, 255, 0.20);
-          background: rgba(255, 255, 255, 0.18);
-          cursor: pointer;
-          color: rgba(6, 19, 37, 0.78);
-          backdrop-filter: blur(10px);
-        }
-
-        .tabActive {
-          background: rgba(27, 115, 255, 0.14);
-          border-color: rgba(27, 115, 255, 0.20);
-          color: rgba(6, 19, 37, 0.86);
-        }
-
-        .chartWrap {
-          background: rgba(255, 255, 255, 0.60);
-          border: 1px solid rgba(255, 255, 255, 0.20);
-          border-radius: 16px;
-          padding: 10px 10px 8px;
-          overflow: hidden;
-          backdrop-filter: blur(10px);
-        }
-
-        .axisLabel {
-          font-size: 11px;
-          fill: rgba(6, 19, 37, 0.52);
-          font-weight: 520;
-        }
-
-        .alert {
-          font-size: 12px;
-          font-weight: 520;
-          padding: 10px 12px;
-          border-radius: 14px;
-        }
-        .alert-ok {
-          color: rgba(17, 94, 45, 0.95);
-          background: rgba(34, 197, 94, 0.14);
-          border: 1px solid rgba(34, 197, 94, 0.22);
-        }
-        .alert-warn {
-          color: rgba(122, 77, 0, 0.95);
-          background: rgba(245, 158, 11, 0.16);
-          border: 1px solid rgba(245, 158, 11, 0.22);
-        }
-        .alert-risk {
-          color: rgba(127, 29, 29, 0.95);
-          background: rgba(239, 68, 68, 0.14);
-          border: 1px solid rgba(239, 68, 68, 0.22);
-        }
-
-        .lower {
-          margin-top: 14px;
-          padding: 14px;
-          background: rgba(255, 255, 255, 0.40);
-        }
-
-        .lowerHead {
-          text-align: center;
-          font-weight: 560;
-          font-size: 13px;
-          color: rgba(6, 19, 37, 0.72);
-          margin: 0 0 10px;
-        }
-
-        .features,
-        .industries {
-          display: grid;
-          grid-template-columns: repeat(3, 1fr);
-          gap: 12px;
-        }
-
-        .feat,
-        .industry {
-          padding: 12px;
-          border-radius: 14px;
-          background: rgba(255, 255, 255, 0.62);
-          border: 1px solid rgba(255, 255, 255, 0.24);
-          backdrop-filter: blur(10px);
-        }
-
-        .feat strong,
-        .industry h4 {
-          display: block;
-          font-size: 13px;
-          font-weight: 560;
-          color: var(--blue);
-          margin: 0 0 6px;
-        }
-
-        .feat p,
-        .industry p {
-          margin: 0;
-          font-size: 13px;
-          font-weight: 460;
-          color: rgba(6, 19, 37, 0.72);
-          line-height: 1.35;
-        }
-
-        .industriesTitle {
-          margin: 12px 0 10px;
-          text-align: center;
-          font-weight: 560;
-          color: rgba(6, 19, 37, 0.72);
-          font-size: 13px;
-        }
-
-        .footer {
-          margin-top: 12px;
-          display: flex;
-          justify-content: center;
-          flex-direction: column;
-          align-items: center;
-          gap: 8px;
-        }
-
-        .footerPill {
-          display: inline-flex;
-          flex-direction: column;
-          align-items: center;
-          gap: 4px;
-          padding: 10px 14px;
-          border-radius: 14px;
-          background: rgba(255, 255, 255, 0.70);
-          border: 1px solid rgba(255, 255, 255, 0.30);
-          color: rgba(6, 19, 37, 0.90);
-          font-weight: 520;
-          backdrop-filter: blur(10px);
-        }
-
-        .footerPill strong {
-          font-weight: 560;
-          color: var(--blue);
-        }
-
-        .footerPill small {
-          font-weight: 460;
-          color: rgba(6, 19, 37, 0.72);
-        }
-
-        .build {
-          font-size: 11px;
-          color: rgba(6, 19, 37, 0.55);
-          background: rgba(255, 255, 255, 0.55);
-          border: 1px solid rgba(255, 255, 255, 0.28);
-          padding: 6px 10px;
-          border-radius: 999px;
-          backdrop-filter: blur(10px);
-        }
-
-        /* POPUP */
-        .popup-overlay {
-          display: none;
-          position: fixed;
-          inset: 0;
-          background: rgba(0, 0, 0, 0.55);
-          z-index: 9999;
-          align-items: center;
-          justify-content: center;
-          padding: 18px;
-        }
-        .popup-overlay.active {
-          display: flex;
-        }
-        .popup {
-          background: rgba(255, 255, 255, 0.94);
-          width: 720px;
-          max-width: 100%;
-          border-radius: 18px;
-          overflow: hidden;
-          position: relative;
-          border: 1px solid rgba(255, 255, 255, 0.35);
-          backdrop-filter: blur(12px);
-        }
-        .popupHead {
-          padding: 18px 18px 10px;
-          border-bottom: 1px solid rgba(0, 0, 0, 0.08);
-          background: linear-gradient(180deg, rgba(27, 115, 255, 0.10), rgba(255, 255, 255, 0.94));
-        }
-        .popupTitle {
-          margin: 0;
-          font-weight: 600;
-          letter-spacing: -0.02em;
-          font-size: 18px;
-        }
-        .popupSub {
-          margin: 6px 0 0;
-          color: rgba(6, 19, 37, 0.72);
-          font-weight: 460;
-          font-size: 12px;
-          line-height: 1.4;
-        }
-        .popupBody {
-          padding: 16px 18px 18px;
-        }
-        .row {
-          display: grid;
-          grid-template-columns: 1fr 1fr;
-          gap: 12px;
-        }
-        label {
-          display: block;
-          font-size: 12px;
-          font-weight: 520;
-          color: rgba(6, 19, 37, 0.70);
-          margin: 0 0 6px;
-        }
-        input,
-        textarea {
-          width: 100%;
-          border-radius: 12px;
-          border: 1px solid rgba(0, 0, 0, 0.16);
-          padding: 12px 12px;
-          font-size: 14px;
-          font-weight: 520;
-          outline: none;
-          background: rgba(255, 255, 255, 0.92);
-          color: #061325;
-        }
-        input:focus,
-        textarea:focus {
-          border-color: rgba(27, 115, 255, 0.55);
-          box-shadow: 0 0 0 4px rgba(27, 115, 255, 0.12);
-        }
-        textarea {
-          min-height: 110px;
-          resize: vertical;
-        }
-        .actions {
-          display: flex;
-          gap: 10px;
-          justify-content: flex-end;
-          margin-top: 12px;
-        }
-        .err {
-          margin-top: 10px;
-          color: #b91c1c;
-          font-weight: 560;
-          font-size: 12px;
-        }
-        .successBox {
-          display: flex;
-          gap: 12px;
-          align-items: flex-start;
-          padding: 14px;
-          border-radius: 14px;
-          background: rgba(34, 197, 94, 0.12);
-          border: 1px solid rgba(34, 197, 94, 0.18);
-          color: #061325;
-          font-weight: 520;
-          font-size: 13px;
-          line-height: 1.45;
-        }
-        .successIcon {
-          width: 28px;
-          height: 28px;
-          border-radius: 999px;
-          display: grid;
-          place-items: center;
-          background: rgba(34, 197, 94, 0.16);
-          border: 1px solid rgba(34, 197, 94, 0.24);
-          font-weight: 700;
-          color: #15803d;
-          flex: 0 0 auto;
-          margin-top: 1px;
-        }
-        .popup-close {
-          position: absolute;
-          top: 10px;
-          right: 12px;
-          width: 40px;
-          height: 40px;
-          border-radius: 999px;
-          border: none;
-          background: rgba(255, 255, 255, 0.94);
-          font-size: 22px;
-          cursor: pointer;
-        }
-        .hp {
-          position: absolute;
-          left: -10000px;
-          top: auto;
-          width: 1px;
-          height: 1px;
-          overflow: hidden;
-        }
-
-        /* ✅ Responsive : même look, juste empilé */
-        @media (max-width: 1040px) {
-  header {
-    background: rgba(255, 255, 255, 0.05);
-  }
-
-  .brand {
-    background: rgba(255, 255, 255, 0.06);
-    border-color: rgba(255, 255, 255, 0.14);
-  }
-
-  .lead {
-    background: rgba(255, 255, 255, 0.10);   /* plus transparent */
-    border-color: rgba(255, 255, 255, 0.22);
-    backdrop-filter: blur(18px) saturate(160%);
-    -webkit-backdrop-filter: blur(18px) saturate(160%);
-  }
-
-  .lead::before {
-    background: linear-gradient(
-      180deg,
-      rgba(255, 255, 255, 0.14),
-      rgba(255, 255, 255, 0.03)
-    );
-  }
-}
-
-      <div className="wrap">
-        <header>
-          <div className="container">
-            <nav>
-              <div className="brand">
-                <img src="/assets/logo.png?v=20251221" alt="Enthalpy" />
-                <div>
-                  <strong>Enthalpy</strong>
-                  <span>COLD &amp; CRITICAL MONITORING</span>
-                </div>
-              </div>
-
-              <button className="btn btnPrimary" onClick={openPopup}>
-                Request pilot access
-              </button>
-            </nav>
+    <div className="relative min-h-screen text-slate-200 selection:bg-blue-500/30">
+      
+      {/* --- NAVBAR --- */}
+      <nav className="fixed top-0 left-0 right-0 z-50 border-b border-white/5 bg-[#020617]/80 backdrop-blur-xl">
+        <div className="container mx-auto px-6 h-20 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <img src="/assets/logo.png" alt="Enthalpy" className="w-8 h-8 opacity-90" />
+            <span className="text-xl font-bold tracking-tight text-white">Enthalpy</span>
           </div>
-        </header>
-
-        <main>
-          <div className="container">
-            <div className="stage">
-              <div className="layout">
-                <section className="glass heroCard">
-                  <div className="heroInner">
-                    <h1>
-                      Smart IoT sensors for critical goods.
-                      <br />
-                      <span className="accent">Blockchain proof &amp; payment when something goes wrong.</span>
-                    </h1>
-
-                    <div className="lead">
-                      Enthalpy monitors temperature, humidity, vibration and CO₂ in real time across warehouses, trucks and
-                      containers.
-                      <br />
-                      When an incident happens, the data is timestamped and sealed as proof on blockchain — and the same
-                      blockchain record can trigger automatic payment (partners, insurance, claims, SLA).
-                    </div>
-
-                    <div className="chips">
-                      <span className="chip">
-                        <span className={`dot dot-${STATUS.temp}`} />
-                        Temp
-                      </span>
-                      <span className="chip">
-                        <span className={`dot dot-${STATUS.humidity}`} />
-                        Humidity
-                      </span>
-                      <span className="chip">
-                        <span className={`dot dot-${STATUS.vibration}`} />
-                        Vibration
-                      </span>
-                      <span className="chip">
-                        <span className={`dot dot-${STATUS.co2}`} />
-                        CO₂
-                      </span>
-
-                      <span className="chip">
-                        <span className="dot dot-ok" />
-                        Proof (blockchain-sealed)
-                      </span>
-                      <span className="chip">
-                        <span className="dot dot-warn" />
-                        Payment (blockchain-triggered)
-                      </span>
-                    </div>
-                  </div>
-                </section>
-
-                <section className="glass chartCard" aria-label="Analytics">
-                  <div className="topRow">
-                    <div className="cardTitle">Analytics</div>
-                    <div className="live">
-                      <span className="liveDot" />
-                      Live
-                    </div>
-                  </div>
-
-                  <div className="tabs">
-                    {(["temp", "humidity", "vibration", "co2"] as Metric[]).map((m) => (
-                      <button
-                        key={m}
-                        className={`tab ${metric === m ? "tabActive" : ""}`}
-                        onClick={() => setMetric(m)}
-                        type="button"
-                      >
-                        {SERIES[m].label}
-                      </button>
-                    ))}
-                  </div>
-
-                  <div className="chartWrap">
-                    <svg width="100%" viewBox={`0 0 ${chart.W} ${chart.H}`} role="img" aria-label="Sensor chart">
-                      {Array.from({ length: 5 }).map((_, i) => {
-                        const y = chart.padY + (i / 4) * (chart.H - chart.padY * 2)
-                        return (
-                          <line
-                            key={i}
-                            x1={chart.padX}
-                            y1={y}
-                            x2={chart.W - chart.padX}
-                            y2={y}
-                            stroke="rgba(6, 19, 37, 0.10)"
-                            strokeWidth="1"
-                          />
-                        )
-                      })}
-
-                      <text x={chart.padX} y={14} className="axisLabel">
-                        {chart.max.toFixed(metric === "vibration" ? 2 : 0)} {chart.s.unit}
-                      </text>
-                      <text x={chart.padX} y={chart.H - 4} className="axisLabel">
-                        {chart.min.toFixed(metric === "vibration" ? 2 : 0)} {chart.s.unit}
-                      </text>
-
-                      <polyline
-                        points={chart.points}
-                        fill="none"
-                        stroke={STATUS_STROKE[status]}
-                        strokeWidth="3.2"
-                        strokeLinejoin="round"
-                        strokeLinecap="round"
-                      />
-                    </svg>
-                  </div>
-
-                  <div className={`alert alert-${status}`}>
-                    {chart.s.alert} — {STATUS_LABEL[status]}
-                  </div>
-                </section>
-              </div>
-
-              <section className="glass lower">
-                <p className="lowerHead">From sensors to proof</p>
-
-                <div className="features">
-                  <div className="feat">
-                    <strong>Evidence</strong>
-                    <p>Incidents captured, timestamped, and stored as proof.</p>
-                  </div>
-                  <div className="feat">
-                    <strong>Instant alerts</strong>
-                    <p>Real-time notifications when limits are exceeded.</p>
-                  </div>
-                  <div className="feat">
-                    <strong>Blockchain</strong>
-                    <p>Proof + payment flows secured via blockchain records.</p>
-                  </div>
-                </div>
-
-                <div className="industriesTitle">Industries where a few degrees cost millions</div>
-
-                <div className="industries">
-                  <div className="industry">
-                    <h4>Pharma &amp; Biotech</h4>
-                    <p>Audit-ready traceability &amp; compliance proof.</p>
-                  </div>
-                  <div className="industry">
-                    <h4>Food &amp; Frozen</h4>
-                    <p>Prevent cold-chain failures &amp; claims.</p>
-                  </div>
-                  <div className="industry">
-                    <h4>Logistics &amp; 3PL</h4>
-                    <p>SLA evidence + partner payments automation.</p>
-                  </div>
-                </div>
-
-                <div className="footer">
-                  <div className="footerPill">
-                    <strong>contact@enthalpy.site</strong>
-                    <small>Tangier, Morocco</small>
-                  </div>
-                  <div className="build">build: {ASSET_VERSION}</div>
-                </div>
-              </section>
-            </div>
-          </div>
-        </main>
-
-        {/* POPUP */}
-        <div
-          className={`popup-overlay ${popupOpen ? "active" : ""}`}
-          onMouseDown={(e) => {
-            if (e.target === e.currentTarget) closePopup()
-          }}
-        >
-          <div className="popup" onMouseDown={(e) => e.stopPropagation()}>
-            <button className="popup-close" onClick={closePopup} aria-label="Close">
-              ×
+          
+          <div className="hidden md:flex items-center gap-8 text-sm font-medium text-slate-400">
+            {/* 
+               SCROLL FIX: Points to #live-feed which is the ID of the dashboard section.
+               This ensures the user sees the Container Header immediately.
+            */}
+            <a href="#live-feed" className="hover:text-white transition-colors">Features</a>
+            <a href="#industries" className="hover:text-white transition-colors">Industries</a>
+            <button 
+              onClick={openPopup}
+              className="px-6 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-full shadow-[0_0_20px_rgba(37,99,235,0.4)] transition-all hover:shadow-[0_0_30px_rgba(37,99,235,0.6)]"
+            >
+              Get Pilot Access
             </button>
+          </div>
 
-            <div className="popupHead">
-              <h3 className="popupTitle">Request pilot access</h3>
-              <p className="popupSub">Tell us about your company and use case. We’ll reply quickly.</p>
+          <button className="md:hidden text-white" onClick={toggleMenu}>
+            {isMenuOpen ? <X /> : <Menu />}
+          </button>
+        </div>
+      </nav>
+
+      {/* --- MOBILE MENU --- */}
+      {isMenuOpen && (
+        <div className="fixed inset-0 z-40 bg-[#020617] pt-24 px-6 md:hidden">
+          <div className="flex flex-col gap-6 text-lg font-medium">
+            <a href="#live-feed" onClick={toggleMenu}>Features</a>
+            <a href="#industries" onClick={toggleMenu}>Industries</a>
+            <button onClick={openPopup} className="text-blue-400">Request Pilot Access</button>
+          </div>
+        </div>
+      )}
+
+      {/* --- HERO SECTION --- */}
+      <section className="relative pt-32 pb-20 lg:pt-48 lg:pb-32 overflow-hidden">
+        
+        {/* Background Ambience */}
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[500px] bg-blue-600/20 rounded-full blur-[120px] pointer-events-none" />
+        
+        <div className="container mx-auto px-6 relative z-10">
+          <div className="grid lg:grid-cols-2 gap-16 items-center">
+            
+            {/* Left Content (UPDATED TEXT) */}
+            <div className="max-w-2xl">
+              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-300 text-sm font-medium mb-8">
+                <span className="relative flex h-2.5 w-2.5">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-blue-500"></span>
+                </span>
+                Live Blockchain Monitoring
+              </div>
+              
+              <h1 className="text-5xl lg:text-7xl font-bold text-white tracking-tight leading-[1.1] mb-8">
+                Cold chain intelligence, <br />
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-cyan-300">
+                  secured by space.
+                </span>
+              </h1>
+              
+              <div className="space-y-4 mb-10 text-lg text-slate-400 leading-relaxed">
+                 <p>
+                    <strong>Real-time IoT monitoring &amp; traceability:</strong> Track temperature, humidity, vibration, and CO₂ across the entire supply chain (warehouses, trucks, containers).
+                 </p>
+                 <p>
+                    <strong>Immediate alerts:</strong> Automatic detection of excursions/deviations with instant notifications to prevent loss.
+                 </p>
+                 <p>
+                    <strong>Blockchain-proof data:</strong> Timestamped, sealed, tamper-proof records ready for audits and disputes.
+                 </p>
+                 <p>
+                    <strong>Automated payments:</strong> Smart contracts trigger insurance claims and SLA penalties automatically based on sensor evidence.
+                 </p>
+              </div>
+              
+              <div className="flex flex-col sm:flex-row gap-4">
+                <button 
+                  onClick={openPopup}
+                  className="px-8 py-4 bg-blue-600 hover:bg-blue-500 text-white rounded-xl font-semibold shadow-[0_0_20px_rgba(37,99,235,0.4)] transition-all flex items-center justify-center gap-2 group"
+                >
+                  Start Pilot
+                  <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                </button>
+                <button 
+                  onClick={() => document.getElementById('live-feed')?.scrollIntoView({behavior: 'smooth'})}
+                  className="px-8 py-4 bg-white/5 hover:bg-white/10 text-white border border-white/10 rounded-xl font-semibold transition-all"
+                >
+                  View Live Feed
+                </button>
+              </div>
             </div>
 
-            <div className="popupBody">
-              {submitted ? (
-                <div className="successBox">
-                  <div className="successIcon">✓</div>
-                  <div>
-                    Request received. A confirmation email has been sent. If you don’t see it, please check Spam or contact{" "}
-                    <b>contact@enthalpy.site</b>.
+            {/* Right Visual (UPDATED SATELLITE SVG) */}
+            <div className="relative h-[400px] lg:h-[600px] flex items-center justify-center">
+              {/* Satellite Image Floating */}
+              <div className="animate-float relative z-10 w-full max-w-[500px]">
+                 <img 
+                   src="/assets/satellite.svg" 
+                   alt="Satellite" 
+                   className="w-full h-auto drop-shadow-[0_0_50px_rgba(59,130,246,0.3)] transform hover:scale-105 transition-transform duration-700 ease-out"
+                 />
+              </div>
+              
+              {/* Decorative Orbits */}
+              <div className="absolute inset-0 border border-white/5 rounded-full scale-[1.2]" />
+              <div className="absolute inset-0 border border-white/5 rounded-full scale-[1.5] border-dashed opacity-50" />
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+      {/* --- LIVE SENSOR FEED (SCROLL ANCHOR) --- */}
+      {/* Added scroll-mt-24 so the navbar doesn't cover the header */}
+      <section id="live-feed" className="py-20 relative scroll-mt-24">
+        <div className="container mx-auto px-6">
+          <div className="glass-panel rounded-3xl p-8 lg:p-12 relative overflow-hidden">
+            
+            {/* Header */}
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-12">
+              <div>
+                <h2 className="text-2xl font-bold text-white">Live Sensor Feed</h2>
+                <p className="text-slate-400 mt-1">Container #8821-X • Trans-Atlantic Route</p>
+              </div>
+              
+              {/* Metric Selector */}
+              <div className="flex p-1 bg-white/5 rounded-xl border border-white/10 overflow-x-auto max-w-full">
+                {(Object.keys(SERIES) as Metric[]).map((m) => (
+                  <button
+                    key={m}
+                    onClick={() => setMetric(m)}
+                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-all whitespace-nowrap flex items-center gap-2
+                      ${metric === m ? "bg-blue-600 text-white shadow-lg" : "text-slate-400 hover:text-white"}`}
+                  >
+                    {SERIES[m].icon}
+                    {SERIES[m].label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Main Chart Layout */}
+            <div className="grid lg:grid-cols-3 gap-12">
+              
+              {/* Left: Stats */}
+              <div className="space-y-6">
+                <div className="glass-panel p-6 rounded-2xl bg-black/20">
+                  <span className="text-slate-400 text-sm font-medium uppercase tracking-wider">Current Value</span>
+                  <div className={`text-5xl font-bold mt-2 ${statusColors[currentStatus].split(' ')[0]}`}>
+                    {currentSeries.data[currentSeries.data.length-1]}
+                    <span className="text-2xl ml-1 text-slate-500">{currentSeries.unit}</span>
                   </div>
+                </div>
+
+                <div className={`p-6 rounded-2xl border flex items-start gap-4 ${statusColors[currentStatus]}`}>
+                   {currentStatus === 'normal' ? <CheckCircle2 className="w-6 h-6 shrink-0" /> : <AlertTriangle className="w-6 h-6 shrink-0" />}
+                   <div>
+                     <h4 className="font-bold text-lg uppercase">{currentStatus}</h4>
+                     <p className="opacity-80 text-sm mt-1">{currentSeries.alert}</p>
+                   </div>
+                </div>
+              </div>
+
+              {/* Right: Chart Area */}
+              <div className="lg:col-span-2 h-[300px] bg-gradient-to-t from-blue-500/5 to-transparent rounded-2xl border border-white/5 p-6 relative">
+                 <Chart />
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+      {/* --- INDUSTRIES (NEW SECTION) --- */}
+      <section id="industries" className="py-20 scroll-mt-24 border-t border-white/5 bg-white/[0.02]">
+        <div className="container mx-auto px-6">
+           <div className="text-center mb-16">
+            <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">Industries</h2>
+            <p className="text-slate-400 max-w-2xl mx-auto">Where precision is not optional.</p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-8">
+            {/* Pharma */}
+            <div className="glass-panel p-8 rounded-3xl group hover:bg-white/5 transition-colors">
+              <div className="w-14 h-14 bg-blue-500/20 rounded-2xl flex items-center justify-center text-blue-400 mb-6 group-hover:scale-110 transition-transform">
+                <FlaskConical className="w-7 h-7" />
+              </div>
+              <h3 className="text-xl font-bold text-white mb-3">Pharmaceuticals</h3>
+              <p className="text-slate-400 leading-relaxed">
+                GDP compliance and audit-ready reports. Ensure vaccine and medication integrity with tamper-proof logs.
+              </p>
+            </div>
+
+            {/* Food */}
+            <div className="glass-panel p-8 rounded-3xl group hover:bg-white/5 transition-colors">
+              <div className="w-14 h-14 bg-amber-500/20 rounded-2xl flex items-center justify-center text-amber-400 mb-6 group-hover:scale-110 transition-transform">
+                <Utensils className="w-7 h-7" />
+              </div>
+              <h3 className="text-xl font-bold text-white mb-3">Food &amp; Agriculture</h3>
+              <p className="text-slate-400 leading-relaxed">
+                Prevent spoilage and reduce waste. Real-time alerts for reefer malfunctions and temperature abuse.
+              </p>
+            </div>
+
+            {/* Bio */}
+            <div className="glass-panel p-8 rounded-3xl group hover:bg-white/5 transition-colors">
+              <div className="w-14 h-14 bg-emerald-500/20 rounded-2xl flex items-center justify-center text-emerald-400 mb-6 group-hover:scale-110 transition-transform">
+                <Leaf className="w-7 h-7" />
+              </div>
+              <h3 className="text-xl font-bold text-white mb-3">Biotech &amp; Life Sciences</h3>
+              <p className="text-slate-400 leading-relaxed">
+                Strict environmental control for sensitive biological samples. End-to-end traceability for clinical trials.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* --- FOOTER --- */}
+      <footer className="py-12 border-t border-white/5 bg-[#010409]">
+        <div className="container mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-6">
+          <div className="flex items-center gap-2">
+            <img src="/assets/logo.png" alt="Enthalpy" className="w-6 h-6 opacity-50" />
+            <span className="text-slate-500 font-semibold">Enthalpy Inc.</span>
+          </div>
+          
+          {/* Updated Footer Info */}
+          <div className="flex flex-col items-center md:items-end gap-2 text-sm">
+            <div className="flex items-center gap-2 text-slate-400">
+               <Globe className="w-4 h-4" /> 
+               Tangier - Morocco
+            </div>
+            <div className="flex items-center gap-2 text-slate-400">
+               <Mail className="w-4 h-4" /> 
+               contact@enthalpy.site
+            </div>
+            <div className="text-slate-600 mt-2">
+              &copy; 2025 Enthalpy. All rights reserved.
+            </div>
+          </div>
+        </div>
+      </footer>
+
+      {/* --- POPUP MODAL --- */}
+      {popupOpen && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-[#020617]/90 backdrop-blur-sm" onClick={closePopup} />
+          
+          <div className="relative w-full max-w-lg glass-panel bg-[#0a1120] rounded-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200 border-white/10">
+            <div className="p-6 border-b border-white/10 flex justify-between items-center">
+              <h3 className="text-xl font-bold text-white">Request Pilot Access</h3>
+              <button onClick={closePopup} className="text-slate-400 hover:text-white"><X className="w-6 h-6"/></button>
+            </div>
+
+            <div className="p-6">
+              {submitted ? (
+                <div className="text-center py-8">
+                  <div className="w-16 h-16 bg-emerald-500/20 rounded-full flex items-center justify-center text-emerald-400 mx-auto mb-4">
+                    <CheckCircle2 className="w-8 h-8" />
+                  </div>
+                  <h4 className="text-2xl font-bold text-white mb-2">Request Sent</h4>
+                  <p className="text-slate-400">We'll be in touch shortly.</p>
+                  <button onClick={closePopup} className="mt-6 px-6 py-2 bg-white/10 hover:bg-white/20 rounded-full text-white">Close</button>
                 </div>
               ) : (
-                <form onSubmit={submitForm}>
-                  <div className="hp">
-                    <label>
-                      Website
-                      <input name="website" value={form.website} onChange={onChange} autoComplete="off" />
-                    </label>
-                  </div>
-
-                  <div className="row">
-                    <div>
-                      <label>Name (optional)</label>
-                      <input name="name" placeholder="Your name" value={form.name} onChange={onChange} autoComplete="name" />
-                    </div>
-                    <div>
-                      <label>Company Name *</label>
-                      <input name="company" placeholder="Company" value={form.company} onChange={onChange} required />
-                    </div>
-                  </div>
-
-                  <div style={{ marginTop: 12 }}>
-                    <label>Work Email *</label>
-                    <input
-                      name="email"
-                      placeholder="name@company.com"
-                      value={form.email}
-                      onChange={onChange}
+                <form onSubmit={submitForm} className="space-y-4">
+                  <div>
+                    <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider block mb-2">Company Name</label>
+                    <input 
+                      name="company" 
                       required
-                      inputMode="email"
-                      autoComplete="email"
+                      value={form.company} 
+                      onChange={handleFormChange}
+                      className="w-full bg-black/20 border border-white/10 rounded-lg px-4 py-3 text-white focus:border-blue-500 focus:outline-none transition-colors"
+                      placeholder="SpaceX"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider block mb-2">Work Email</label>
+                    <input 
+                      name="email" 
+                      type="email"
+                      required
+                      value={form.email} 
+                      onChange={handleFormChange}
+                      className="w-full bg-black/20 border border-white/10 rounded-lg px-4 py-3 text-white focus:border-blue-500 focus:outline-none transition-colors"
+                      placeholder="elon@spacex.com"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider block mb-2">Use Case</label>
+                    <textarea 
+                      name="message" 
+                      required
+                      value={form.message} 
+                      onChange={handleFormChange}
+                      className="w-full bg-black/20 border border-white/10 rounded-lg px-4 py-3 text-white focus:border-blue-500 focus:outline-none transition-colors min-h-[100px]"
+                      placeholder="We need to monitor Cryo-tanks..."
                     />
                   </div>
 
-                  <div style={{ marginTop: 12 }}>
-                    <label>Message *</label>
-                    <textarea
-                      name="message"
-                      placeholder="What do you monitor? (assets, routes, limits, alerts needed...)"
-                      value={form.message}
-                      onChange={onChange}
-                      required
-                    />
-                  </div>
+                  {errorMsg && <p className="text-rose-400 text-sm">{errorMsg}</p>}
 
-                  {errorMsg ? <div className="err">{errorMsg}</div> : null}
-
-                  <div className="actions">
-                    <button type="button" className="btn" onClick={closePopup} disabled={submitting}>
-                      Cancel
-                    </button>
-                    <button type="submit" className="btn btnPrimary" disabled={submitting}>
-                      {submitting ? "Sending..." : "Submit request"}
-                    </button>
-                  </div>
+                  <button 
+                    type="submit" 
+                    disabled={submitting}
+                    className="w-full py-4 bg-blue-600 hover:bg-blue-500 text-white rounded-xl font-bold shadow-lg shadow-blue-900/20 transition-all flex items-center justify-center gap-2 mt-4"
+                  >
+                    {submitting ? "Sending..." : "Submit Request"}
+                    {!submitting && <Send className="w-4 h-4" />}
+                  </button>
                 </form>
               )}
             </div>
           </div>
         </div>
-      </div>
-    </>
+      )}
+    </div>
   )
 }

@@ -1,0 +1,32 @@
+You are tasked with implementing the following improvements and fixes on the existing website based on a recent review:
+
+Features section scroll issue
+When clicking on "Features" in the navigation, the page currently scrolls directly to the graph in the "Live Sensor Feed" section. Fix the anchor link so that it first scrolls to and properly displays the container header:
+Container #8821-X • Trans-Atlantic Route
+followed by Temperature / Humidity / Vibration
+before showing the graph below it. Ensure the full section header is visible upon clicking the link.
+Broken satellite image
+The current satellite image on the site is broken. Create a new high-quality satellite-style background image (relevant to shipping/container tracking or space-themed if it fits the branding) and place it in the folder public/assets. Update the code to reference this new image instead of the broken one.
+Industries section
+When clicking on "Industries" in the navigation, nothing happens currently. Add a new category/section for the following industries:
+Pharmaceuticals (Pharma)
+Food & Agriculture (Agroalimentaire)
+Biotech / Life Sciences (Bio)
+Include appropriate descriptions, icons, or visuals for these new categories.
+
+Update the main value proposition text
+In the section currently reading:
+"Cold chain intelligence, secured by space. Monitor temperature, vibration, and humidity in real-time. Automatically trigger insurance claims and SLA payments via smart contracts when critical limits are breached."Rewrite and expand it to clearly highlight the full Enthalpy solution, emphasizing the following key points:
+Real-time IoT monitoring & traceability: temperature, humidity, vibration, and CO₂ across the entire supply chain (warehouses, trucks, containers).
+Immediate alerts: automatic detection of excursions/deviations with instant notifications.
+Blockchain-proof data (audit-ready): timestamped, sealed, tamper-proof records for audits and disputes.
+Automated payments: blockchain evidence can automatically trigger financial flows (insurance claims, SLA penalties, partner payments).
+Make sure the updated text is clear, concise, and prominently displayed.
+Remove Sign In
+Completely remove the "Sign In" button/link from the navigation/header.
+Add footer information
+At the bottom of the page (in the footer), add the following lines:
+Tangier - Morocco
+contact@enthalpy.siteStyle it consistently with the existing footer design.
+
+Please implement these changes cleanly, test all navigation links and scroll behaviors, and ensure the site remains fully responsive.
