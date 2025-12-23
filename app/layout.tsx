@@ -12,7 +12,10 @@ export const metadata: Metadata = {
   title: "Enthalpy",
   description: "Cold chain intelligence, secured by space.",
   icons: {
-    icon: "/favicon.png",
+    icon: [
+      { url: "/favicon.ico" },
+      { url: "/favicon.png", type: "image/png" },
+    ],
   },
 }
 
