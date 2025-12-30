@@ -1,165 +1,134 @@
-// app/privacy/page.tsx
 import Link from "next/link"
-
-export const metadata = {
-  title: "Privacy Policy — Enthalpy",
-  description: "Privacy Policy for Enthalpy (cold chain monitoring & blockchain proof).",
-}
+import { ArrowLeft } from "lucide-react"
 
 export default function PrivacyPage() {
   return (
-    <div
-      style={{
-        minHeight: "100svh",
-        backgroundImage: "url(/assets/bg-ocean.jpg)",
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-      }}
-    >
-      {/* léger voile pour la lisibilité */}
-      <div
-        style={{
-          minHeight: "100svh",
-          background:
-            "radial-gradient(900px 520px at 18% 10%, rgba(255,255,255,0.35), rgba(255,255,255,0.10)), linear-gradient(180deg, rgba(255,255,255,0.06), rgba(0,0,0,0.12))",
-          padding: "28px 16px",
-        }}
-      >
-        <div
-          style={{
-            maxWidth: 980,
-            margin: "0 auto",
-          }}
-        >
-          {/* top bar minimal */}
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              gap: 12,
-              padding: "12px 14px",
-              borderRadius: 16,
-              background: "rgba(255,255,255,0.55)",
-              border: "1px solid rgba(255,255,255,0.30)",
-              backdropFilter: "blur(12px)",
-            }}
-          >
-            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-              <img src="/assets/logo.png" alt="Enthalpy" style={{ width: 30, height: 30 }} />
-              <div style={{ lineHeight: 1.1 }}>
-                <div style={{ fontWeight: 600, color: "rgba(6,19,37,0.90)" }}>Enthalpy</div>
-                <div style={{ fontSize: 11, letterSpacing: "0.18em", color: "rgba(6,19,37,0.55)" }}>
-                  PRIVACY
-                </div>
-              </div>
-            </div>
+    <main className="relative min-h-screen text-slate-200 bg-[#020617] overflow-hidden">
+      {/* Background ambience (same vibe as home) */}
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[500px] bg-blue-600/20 rounded-full blur-[120px] pointer-events-none" />
 
-            <Link
-              href="/"
-              style={{
-                textDecoration: "none",
-                padding: "10px 14px",
-                borderRadius: 999,
-                background: "linear-gradient(135deg,#1b73ff,#00c8ff)",
-                color: "white",
-                fontWeight: 600,
-                boxShadow: "0 14px 30px rgba(27,115,255,0.25)",
-                whiteSpace: "nowrap",
-              }}
-            >
-              Back to site
-            </Link>
-          </div>
-
-          {/* content card */}
-          <main
-            style={{
-              marginTop: 16,
-              padding: "22px 18px",
-              borderRadius: 18,
-              background: "rgba(255,255,255,0.60)",
-              border: "1px solid rgba(255,255,255,0.30)",
-              backdropFilter: "blur(14px)",
-              color: "rgba(6,19,37,0.88)",
-            }}
+      <div className="container mx-auto px-6 pt-24 pb-16 max-w-3xl relative z-10">
+        {/* Top bar */}
+        <div className="flex items-center justify-between mb-8">
+          <Link
+            href="/"
+            className="inline-flex items-center gap-2 text-slate-300 hover:text-white transition-colors"
           >
-            <h1 style={{ margin: 0, fontSize: 32, letterSpacing: "-0.02em" }}>Privacy Policy</h1>
-            <p style={{ marginTop: 8, marginBottom: 18, color: "rgba(6,19,37,0.70)", lineHeight: 1.6 }}>
-              Effective date: <b>2025-12-25</b>
+            <ArrowLeft className="w-4 h-4" />
+            Back
+          </Link>
+        </div>
+
+        <h1 className="text-3xl font-bold text-white mb-2">Privacy Policy</h1>
+        <p className="text-slate-500 mb-8"></p>
+
+        {/* Legal entity block */}
+        <div className="rounded-2xl border border-white/10 bg-white/5 p-6 mb-10">
+          <h2 className="text-lg font-semibold text-white mb-3">Data Controller (Legal Entity)</h2>
+
+          <div className="space-y-2 text-slate-400">
+            <p>
+              <span className="text-slate-200 font-medium">Legal entity:</span> 01Marketing (Morocco)
+            </p>
+            <p>
+              <span className="text-slate-200 font-medium">Trade name / brand:</span> Enthalpy
             </p>
 
-            <section style={{ lineHeight: 1.7 }}>
-              <p style={{ marginTop: 0 }}>
-                Enthalpy (“we”, “us”) provides cold & critical monitoring with IoT sensors and blockchain-proof evidence.
-                This Policy explains how we collect, use, and protect information when you use our website and request pilot
-                access.
-              </p>
+            <p className="pt-2 text-slate-200 font-medium">Registered address:</p>
+            <p>RESIDENCE CHAOUIA AV YOUSSEF IBN TACHAFINE</p>
+            <p>RUE RACHID REDA, 4th FLOOR N°21</p>
+            <p>Tangier, Morocco</p>
 
-              <h2 style={{ marginTop: 18, fontSize: 18 }}>Information we collect</h2>
-              <ul>
-                <li>
-                  <b>Pilot access form:</b> company name, work email, message, and optional name.
-                </li>
-                <li>
-                  <b>Basic technical data:</b> IP address, device/browser, and logs for security and performance (typical web
-                  server logs).
-                </li>
-              </ul>
+            <p className="pt-2">
+              <span className="text-slate-200 font-medium">RC:</span> 132021
+            </p>
+            <p>
+              <span className="text-slate-200 font-medium">ICE:</span> 003134205000041
+            </p>
 
-              <h2 style={{ marginTop: 18, fontSize: 18 }}>How we use information</h2>
-              <ul>
-                <li>To respond to your pilot access request and communicate with you.</li>
-                <li>To operate, secure, and improve the website (fraud prevention, debugging, performance).</li>
-                <li>To maintain records related to compliance and business operations.</li>
-              </ul>
-
-              <h2 style={{ marginTop: 18, fontSize: 18 }}>Blockchain & sensor data</h2>
-              <p>
-                Enthalpy’s blockchain proof is designed for sensor events (e.g., temperature excursions). We do not intend to
-                store personal data on-chain. If this changes for a specific deployment, we will provide deployment-specific
-                terms and data processing details.
-              </p>
-
-              <h2 style={{ marginTop: 18, fontSize: 18 }}>Sharing</h2>
-              <p>
-                We may use service providers to run the website and send emails (hosting, email delivery). We share only what is
-                necessary to provide the service. We do not sell your personal data.
-              </p>
-
-              <h2 style={{ marginTop: 18, fontSize: 18 }}>Retention</h2>
-              <p>
-                We keep form submissions as long as needed to handle requests and maintain operational records, then delete or
-                anonymize when no longer necessary.
-              </p>
-
-              <h2 style={{ marginTop: 18, fontSize: 18 }}>Your rights</h2>
-              <p>
-                You can request access, correction, or deletion of your information by contacting us.
-              </p>
-
-              <h2 style={{ marginTop: 18, fontSize: 18 }}>Contact</h2>
-              <p>
-                Email:{" "}
-                <a href="mailto:contact@enthalpy.site" style={{ color: "#1b73ff", fontWeight: 600 }}>
-                  contact@enthalpy.site
-                </a>
-                <br />
-                Location: Tangier, Morocco
-              </p>
-
-              <h2 style={{ marginTop: 18, fontSize: 18 }}>Changes</h2>
-              <p>
-                We may update this policy from time to time. The latest version will always be available on this page.
-              </p>
-            </section>
-          </main>
-
-          <div style={{ textAlign: "center", marginTop: 14, color: "rgba(255,255,255,0.85)" }}>
-            <small>© 2025 Enthalpy</small>
+            <p className="pt-2">
+              <span className="text-slate-200 font-medium">Contact email:</span> contact@enthalpy.site
+            </p>
           </div>
         </div>
+
+        <div className="space-y-8 text-slate-400 leading-relaxed">
+          <section>
+            <h2 className="text-xl font-semibold text-white mb-2">Overview</h2>
+            <p>
+              Enthalpy (“we”, “us”) provides cold &amp; critical monitoring with IoT sensors and blockchain-proof evidence.
+              This Policy explains how we collect, use, and protect information when you use our website and request pilot access.
+            </p>
+          </section>
+
+          <section>
+            <h2 className="text-xl font-semibold text-white mb-2">Information we collect</h2>
+            <ul className="list-disc pl-6 space-y-2">
+              <li>
+                <span className="text-slate-200 font-medium">Pilot access form:</span> company name, work email, message,
+                and optional name.
+              </li>
+              <li>
+                <span className="text-slate-200 font-medium">Basic technical data:</span> IP address, device/browser,
+                and logs for security and performance (typical web server logs).
+              </li>
+            </ul>
+          </section>
+
+          <section>
+            <h2 className="text-xl font-semibold text-white mb-2">How we use information</h2>
+            <ul className="list-disc pl-6 space-y-2">
+              <li>To respond to your pilot access request and communicate with you.</li>
+              <li>To operate, secure, and improve the website (fraud prevention, debugging, performance).</li>
+              <li>To maintain records related to compliance and business operations.</li>
+            </ul>
+          </section>
+
+          <section>
+            <h2 className="text-xl font-semibold text-white mb-2">Blockchain &amp; sensor data</h2>
+            <p>
+              Enthalpy’s blockchain proof is designed for sensor events (e.g., temperature excursions). We do not intend to
+              store personal data on-chain. If this changes for a specific deployment, we will provide deployment-specific
+              terms and data processing details.
+            </p>
+          </section>
+
+          <section>
+            <h2 className="text-xl font-semibold text-white mb-2">Sharing</h2>
+            <p>
+              We may use service providers to run the website and send emails (hosting, email delivery). We share only what
+              is necessary to provide the service. We do not sell your personal data.
+            </p>
+          </section>
+
+          <section>
+            <h2 className="text-xl font-semibold text-white mb-2">Retention</h2>
+            <p>
+              We keep form submissions as long as needed to handle requests and maintain operational records, then delete
+              or anonymize when no longer necessary.
+            </p>
+          </section>
+
+          <section>
+            <h2 className="text-xl font-semibold text-white mb-2">Your rights</h2>
+            <p>You can request access, correction, or deletion of your information by contacting us.</p>
+          </section>
+
+          <section>
+            <h2 className="text-xl font-semibold text-white mb-2">Contact</h2>
+            <p>
+              Email: <span className="text-slate-200 font-medium">contact@enthalpy.site</span>
+              <br />
+              Location: Tangier, Morocco
+            </p>
+          </section>
+
+          <section>
+            <h2 className="text-xl font-semibold text-white mb-2">Changes</h2>
+            <p>We may update this policy from time to time. The latest version will always be available on this page.</p>
+          </section>
+        </div>
       </div>
-    </div>
+    </main>
   )
 }
